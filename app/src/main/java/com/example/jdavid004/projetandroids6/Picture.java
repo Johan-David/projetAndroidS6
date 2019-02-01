@@ -22,6 +22,22 @@ public class Picture  {
     private int height;
     private int[] tabPixels;
 
+    public Bitmap getBmp() {
+        return bmp;
+    }
+
+    public int getWidth() {
+        return width;
+    }
+
+    public int getHeight() {
+        return height;
+    }
+
+    public int[] getTabPixels() {
+        return tabPixels;
+    }
+
     Picture(Resources resources) {
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inMutable = true;
@@ -31,10 +47,12 @@ public class Picture  {
         this.height = bmp.getHeight();
     }
 
-    public Bitmap getBmp() {
-        return bmp;
+    Picture(Picture picture) {
+        this.bmp = picture.getBmp().copy(picture.getBmp().getConfig(), true);
+        this.width = picture.getWidth();
+        this.height = picture.getHeight();
+        this.tabPixels = picture.getTabPixels();
     }
-
 
     void toGray(Bitmap bmp){
         int[] pixels = new int[bmp.getHeight()*bmp.getWidth()];
@@ -432,6 +450,26 @@ public class Picture  {
         allocationB.destroy();
         histEqScript.destroy();
         rs.destroy();
+    }
+
+    void AdjustLuminosityRS(Context context, int pourcent, Picture picture){
+        if(pourcent != 100){
+            RenderScript rs = RenderScript.create(context);
+
+            Allocation input = Allocation.createFromBitmap(rs,bmp);
+            Allocation output = Allocation.createTyped(rs,input.getType());
+
+            ScriptC_AdjustLuminosityHSV AdjustLuminosityHSVScript = new ScriptC_AdjustLuminosityHSV(rs);
+
+            AdjustLuminosityHSVScript.set_luminosity(pourcent/100.f);
+
+            AdjustLuminosityHSVScript.forEach_AdjustLuminosityHSV(input,output);
+
+            output.copyTo(picture.getBmp());
+
+            input.destroy(); output.destroy();
+            AdjustLuminosityHSVScript.destroy(); rs.destroy();
+        }
     }
 
 }

@@ -8,23 +8,32 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.ImageView;
+import android.widget.SeekBar;
+
+import static java.security.AccessController.getContext;
 import android.widget.Toast;
 
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBarChangeListener{
 
     private ImageView img;
-    Picture picture;
+    private Picture originalPicture;
+    private Picture currentPicture;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
         img = findViewById(R.id.vegetablePicture);
-        this.picture = new Picture(getResources());
-        img.setImageBitmap(picture.getBmp());
+        originalPicture = new Picture(getResources());
+        currentPicture = new Picture(originalPicture);
+        img.setImageBitmap(currentPicture.getBmp());
+
+        SeekBar seekbarlum = (SeekBar)findViewById(R.id.seekbarlum);
+        seekbarlum.setOnSeekBarChangeListener(this);
+        seekbarlum.setMax(300);
+        seekbarlum.setProgress(100);
     }
 
     @Override
@@ -43,11 +52,10 @@ public class MainActivity extends AppCompatActivity {
                 startActivityForResult(intent,0);
                 return true;
             case R.id.toGrey:
-                picture.toGray(picture.getBmp());
+                currentPicture.toGray(currentPicture.getBmp());
             case R.id.contrastMenu:
                 Toast.makeText(this,"menu selected", Toast.LENGTH_SHORT);
                 return true;
-
             case R.id.convolutionMenu:
                 Toast.makeText(this,"menu selected", Toast.LENGTH_SHORT);
                 return true;
@@ -55,4 +63,20 @@ public class MainActivity extends AppCompatActivity {
         }
         return super.onOptionsItemSelected(item);
     }
+
+    @Override
+    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+
+    }
+
+    @Override
+    public void onStartTrackingTouch(SeekBar seekBar) {
+
+    }
+
+    @Override
+    public void onStopTrackingTouch(SeekBar seekBar) {
+        originalPicture.AdjustLuminosityRS(getApplicationContext(),seekBar.getProgress(),currentPicture);
+    }
+
 }

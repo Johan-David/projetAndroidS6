@@ -49,28 +49,20 @@ public class Convolution {
                 int sumGreen = 0;
                 int sumBlue = 0;
 
-                for(int my = 0; my < this.m_height; my++){                           //Parcours de la matrice
-                    for(int mx = 0; mx < this.m_width; mx++){
-                        int curPixel = SrcPixels[(x+mx)+(y+my)*bmp.getWidth()];     //Pixels couvèrent par la matrice
-
-                        int mValue = matrix[my][mx];                                //Valeur de la matrice en (mx,my)
-
-                        sumRed = sumRed + (Color.red(curPixel)*mValue);
-                        sumGreen = sumGreen + (Color.green(curPixel)*mValue);
-                        sumBlue = sumBlue + (Color.blue(curPixel)*mValue);
-                    }
-                }
-
                 int sumRed2 = 0;
                 int sumGreen2 = 0;
                 int sumBlue2 = 0;
 
-                if(secondApplyWithMatrixTranslation){
-                    for(int my = 0; my < this.m_height; my++){                           //Parcours de la matrice
-                        for(int mx = 0; mx < this.m_width; mx++){
-                            int curPixel = SrcPixels[(x+mx)+(y+my)*bmp.getWidth()];     //Pixels couvèrent par la matrice
-                            int mValue = matrix[mx][my];                                //Valeur de la matrice en (my,mx)
+                for(int my = 0; my < this.m_height; my++){                          //Parcours de la matrice
+                    for(int mx = 0; mx < this.m_width; mx++){
+                        int curPixel = SrcPixels[(x+mx)+(y+my)*bmp.getWidth()];     //Pixels couvèrent par la matrice
+                        int mValue = matrix[mx][my];                                //Valeur de la matrice en (mx,my)
+                        sumRed = sumRed + (Color.red(curPixel)*mValue);
+                        sumGreen = sumGreen + (Color.green(curPixel)*mValue);
+                        sumBlue = sumBlue + (Color.blue(curPixel)*mValue);
 
+                        if(secondApplyWithMatrixTranslation){
+                            mValue = matrix[my][mx];                                //Valeur de la matrice en (my,mx)
                             sumRed2 = sumRed2 + (Color.red(curPixel)*mValue);
                             sumGreen2 = sumGreen2 + (Color.green(curPixel)*mValue);
                             sumBlue2 = sumBlue2 + (Color.blue(curPixel)*mValue);
