@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item android:id="@+id/camera"
+        android:icon="@drawable/ic_camera"
+        android:title="camera"
+        app:showAsAction="ifRoom" ></item>
+
+    <item android:id="@+id/colorMenu"
+        android:icon="@drawable/ic_menu"
+        android:title="Color"
+        app:showAsAction="never" >
+
+        <menu>
+            <item android:id="@+id/toGrey"
+                android:title="toGrey"
+                app:showAsAction="never" ></item>
+        </menu>
+    </item>
+
+    <item android:id="@+id/contrastMenu"
+        android:icon="@drawable/ic_menu"
+        android:title="contrastMenu"
+        app:showAsAction="never" >
+
+        <menu>
+            <item android:id="@+id/menu1"
+                android:title="menu1"
+                app:showAsAction="never" ></item>
+        </menu>
+    </item>
+
+    <item android:id="@+id/convolutionMenu"
+        android:icon="@drawable/ic_menu"
+        android:title="convolutionMenu"
+        app:showAsAction="never" >
+
+        <menu>
+            <item android:id="@+id/menu2"
+                android:title="menu1"
+                app:showAsAction="never" ></item>
+        </menu>
+    </item>
+
+</menu>
