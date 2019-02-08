@@ -85,21 +85,36 @@ public class Convolution {
                     GradiantBlue[index_center] = moduleGradiantBlue;
 
                 } else {
-                    int newRed = (sumRed / this.factor);
+                    int newRed = 0;
+                    try {
+                        newRed = (sumRed / this.factor);
+                    }catch(Exception e ){
+                        System.out.print(e.getMessage());
+                    }
                     if(newRed < 0){
                         newRed = 0;
                     }else if(newRed > 255){
                         newRed = 255;
                     }
 
-                    int newGreen = (sumGreen / this.factor);
+                    int newGreen = 0;
+                    try {
+                        newGreen = (sumGreen / this.factor);
+                    }catch(Exception e ){
+                        System.out.print(e.getMessage());
+                    }
                     if(newGreen < 0){
                         newGreen = 0;
                     }else if(newGreen > 255){
                         newGreen = 255;
                     }
 
-                    int newBlue = (sumBlue / this.factor);
+                    int newBlue = 0;
+                    try {
+                        newBlue = (sumBlue / this.factor);
+                    }catch(Exception e ){
+                        System.out.print(e.getMessage());
+                    }
                     if(newBlue < 0){
                         newBlue = 0;
                     }else if(newBlue > 255){

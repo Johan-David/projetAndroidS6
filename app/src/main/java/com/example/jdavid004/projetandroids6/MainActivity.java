@@ -37,13 +37,16 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+    public boolean onCreateOptionsMenu(Menu menu) { // Met en place le menu pour choisir les différents traitements d'images.
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.example_menu, menu);
         return true;
     }
 
     @Override
+    /**
+     * Fonction utilisée pour faire le lien entre le xml et les fonctions pour les menus
+     */
     public boolean onOptionsItemSelected(MenuItem item) {
         switch(item.getItemId()){
             // Cas où on clique sur la caméra pour accéder à l'appareil photo.
@@ -53,7 +56,19 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                 return true;
             case R.id.toGrey:
                 currentPicture.toGray(currentPicture.getBmp());
-            case R.id.contrastMenu:
+            case R.id.colorize:
+                currentPicture.colorizeRS(currentPicture.getBmp(),getApplicationContext());
+            case R.id.colorOnly:
+                currentPicture.redOnlyHsvRS(currentPicture.getBmp(),getApplicationContext());
+            case R.id.contrastDynamicExten:
+                currentPicture.contrastDynamicExtensionRGBAverage(currentPicture.getBmp());
+            case R.id.contrastEqualHisto:
+                currentPicture.contrastHistogramEqualizationYuvRS(currentPicture.getBmp(),getApplicationContext());
+
+
+
+
+            case R.id.contrastMenu:                                                     // Aide juste au debug
                 Toast.makeText(this,"menu selected", Toast.LENGTH_SHORT);
                 return true;
             case R.id.convolutionMenu:
@@ -76,7 +91,7 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
 
     @Override
     public void onStopTrackingTouch(SeekBar seekBar) {
-        originalPicture.AdjustLuminosityRS(getApplicationContext(),seekBar.getProgress(),currentPicture);
+        currentPicture.AdjustLuminosityRS(getApplicationContext(),seekBar.getProgress(),currentPicture);
     }
 
 }
