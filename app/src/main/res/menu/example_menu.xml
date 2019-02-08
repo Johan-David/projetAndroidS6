@@ -66,5 +66,8 @@
                 android:title="Sobel" />
         </menu>
     </item>
+    <item
+        android:id="@+id/Luminosity"
+        android:title="Luminosity" />
 
 </menu>
