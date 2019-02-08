@@ -7,10 +7,14 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 
 import static java.security.AccessController.getContext;
+
+import android.widget.TextView;
 import android.widget.Toast;
 
 
@@ -19,6 +23,9 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
     private ImageView img;
     private Picture originalPicture;
     private Picture currentPicture;
+    private Picture copyCurrentPicture;
+    private SeekBar seekbarlum;
+    private TextView textLumi;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,10 +37,12 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
         currentPicture = new Picture(originalPicture);
         img.setImageBitmap(currentPicture.getBmp());
 
-        SeekBar seekbarlum = (SeekBar)findViewById(R.id.seekbarlum);
+        seekbarlum = (SeekBar)findViewById(R.id.seekbarlum);
+        seekbarlum.setVisibility(View.GONE);
         seekbarlum.setOnSeekBarChangeListener(this);
         seekbarlum.setMax(300);
-        seekbarlum.setProgress(100);
+        textLumi = (TextView) findViewById(R.id.textLumi);
+        textLumi.setVisibility(View.GONE);
     }
 
     @Override
@@ -48,6 +57,8 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
      * Fonction utilisée pour faire le lien entre le xml et les fonctions pour les menus
      */
     public boolean onOptionsItemSelected(MenuItem item) {
+        seekbarlum.setVisibility(View.GONE);
+        textLumi.setVisibility(View.GONE);
         switch(item.getItemId()){
             // Cas où on clique sur la caméra pour accéder à l'appareil photo.
             case R.id.camera:
@@ -56,15 +67,25 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                 return true;
             case R.id.toGrey:
                 currentPicture.toGray(currentPicture.getBmp());
+                return true;
             case R.id.colorize:
                 currentPicture.colorizeRS(currentPicture.getBmp(),getApplicationContext());
+                return true;
             case R.id.colorOnly:
                 currentPicture.redOnlyHsvRS(currentPicture.getBmp(),getApplicationContext());
+                return true;
             case R.id.contrastDynamicExten:
                 currentPicture.contrastDynamicExtensionRGBAverage(currentPicture.getBmp());
+                return true;
             case R.id.contrastEqualHisto:
                 currentPicture.contrastHistogramEqualizationYuvRS(currentPicture.getBmp(),getApplicationContext());
-
+                return true;
+            case R.id.Luminosity:
+                seekbarlum.setProgress(100);
+                seekbarlum.setVisibility(View.VISIBLE);
+                textLumi.setVisibility(View.VISIBLE);
+                copyCurrentPicture = new Picture(currentPicture);
+                return true;
 
 
 
@@ -91,7 +112,7 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
 
     @Override
     public void onStopTrackingTouch(SeekBar seekBar) {
-        currentPicture.AdjustLuminosityRS(getApplicationContext(),seekBar.getProgress(),currentPicture);
+        copyCurrentPicture.AdjustLuminosityRS(getApplicationContext(),seekBar.getProgress(),currentPicture);
     }
 
 }

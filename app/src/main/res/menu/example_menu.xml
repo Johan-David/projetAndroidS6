@@ -54,5 +54,8 @@
                 app:showAsAction="never" ></item>
         </menu>
     </item>
+    <item
+        android:id="@+id/Luminosity"
+        android:title="Luminosity" />
 
 </menu>
