@@ -54,7 +54,7 @@ public class Picture  {
         this.tabPixels = picture.getTabPixels();
     }
 
-    void toGray(Bitmap bmp){
+    void toGray(){
         int[] pixels = new int[bmp.getHeight()*bmp.getWidth()];
         bmp.getPixels(pixels,0,bmp.getWidth(),0,0,bmp.getWidth(),bmp.getHeight());
 
@@ -99,10 +99,11 @@ public class Picture  {
         bmp.setPixels(pixels,0,bmp.getWidth(),0,0,bmp.getWidth(),bmp.getHeight());
     }
 
-    void colorizeRS(Bitmap bmp, Context context){
+    void colorizeRS(Context context){
+        System.out.println("Salut on est passé par Colorize bande de chiens");
         RenderScript  rs = RenderScript.create(context);
 
-        Allocation  input = Allocation.createFromBitmap(rs,bmp);
+        Allocation  input = Allocation.createFromBitmap(rs,this.bmp);
         Allocation output = Allocation.createTyped(rs,input.getType());
 
         ScriptC_colorize colorizeScript = new ScriptC_colorize(rs);
@@ -113,7 +114,7 @@ public class Picture  {
 
         colorizeScript.forEach_colorize(input,output);
 
-        output.copyTo(bmp);
+        output.copyTo(this.bmp);
 
         input.destroy(); output.destroy();
         colorizeScript.destroy(); rs.destroy();
@@ -137,7 +138,7 @@ public class Picture  {
         bmp.setPixels(pixels,0,bmp.getWidth(),0,0,bmp.getWidth(),bmp.getHeight());
     }
 
-    void redOnlyHsvRS(Bitmap bmp, Context context){
+    void redOnlyHsvRS(Context context){
         RenderScript rs = RenderScript.create(context);
 
         Allocation input = Allocation.createFromBitmap(rs,bmp);
@@ -274,7 +275,7 @@ public class Picture  {
         bmp.setPixels(pixels,0,bmp.getWidth(),0,0,bmp.getWidth(),bmp.getHeight());
     }
 
-    void contrastDynamicExtensionRGBAverage(Bitmap bmp){
+    void contrastDynamicExtensionRGBAverage(){
         int[] pixels = new int[bmp.getHeight()*bmp.getWidth()];
         bmp.getPixels(pixels,0,bmp.getWidth(),0,0,bmp.getWidth(),bmp.getHeight());
         int min = 255;
@@ -410,7 +411,7 @@ public class Picture  {
         bmp.setPixels(pixels,0,bmp.getWidth(),0,0,bmp.getWidth(),bmp.getHeight());
     }
 
-    void contrastHistogramEqualizationYuvRS(Bitmap bmp,Context context){
+    void contrastHistogramEqualizationYuvRS(Context context){
         //Get image size
         int width = bmp.getWidth();
         int height = bmp.getHeight();

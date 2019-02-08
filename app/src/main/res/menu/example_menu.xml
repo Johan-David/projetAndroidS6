@@ -43,15 +43,27 @@
         </menu>
     </item>
 
-    <item android:id="@+id/convolutionMenu"
+    <item
+        android:id="@+id/Blur"
         android:icon="@drawable/ic_menu"
-        android:title="convolutionMenu"
-        app:showAsAction="never" >
+        android:title="Blur"
+        app:showAsAction="never">
 
         <menu>
-            <item android:id="@+id/flou"
-                android:title="menu1"
-                app:showAsAction="never" ></item>
+            <item
+                android:id="@+id/averaging"
+                android:title="Moyenneur" />
+            <item android:title="Gaussien" />
+        </menu>
+    </item>
+    <item android:title="Contour">
+        <menu>
+            <item
+                android:id="@+id/prewitt"
+                android:title="Prewitt" />
+            <item
+                android:id="@+id/sobel"
+                android:title="Sobel" />
         </menu>
     </item>
 
