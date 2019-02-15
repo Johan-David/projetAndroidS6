@@ -2,8 +2,17 @@
 #pragma  rs  java_package_name(com.example.jdavid004.projetandroids6)
 #pragma rs_fp_relaxed
 
-uchar4  RS_KERNEL  red_only_hsv(uchar4  in){
+float hue = 0;
 
+uchar4  RS_KERNEL  color_only_hsv(uchar4  in){
+    float minHSV = hue - 20;
+    float maxHSV = hue + 20;
+    if(minHSV < 0){
+        minHSV += 360;
+    }
+    if(maxHSV >= 360){
+        maxHSV -= 360;
+    }
     float pixelh;
     const  float4  pixelf = rsUnpackColor8888(in);
 
@@ -24,7 +33,7 @@ uchar4  RS_KERNEL  red_only_hsv(uchar4  in){
         pixelh=60*((pixelf.r-pixelf.g)/(deltaRGB))+240;
     }
 
-    if (pixelh >= 15 && pixelh <= 345) {
+    if (pixelh < minHSV || pixelh > maxHSV) {
         float Grey = (0.3 * pixelf.r + 0.59 * pixelf.g + 0.11 * pixelf.b);
         return rsPackColorTo8888(Grey,Grey,Grey,pixelf.a);
     }
