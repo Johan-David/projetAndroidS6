@@ -116,7 +116,7 @@ public class Picture  {
         float[] hsv = new float[3];
         Color.RGBToHSV(Color.red(color), Color.green(color), Color.blue(color), hsv);
 
-        colorizeScript.set_rand(hsv[0]);
+        colorizeScript.set_color(hsv[0]);
 
         colorizeScript.forEach_colorize(input,output);
 
@@ -144,20 +144,22 @@ public class Picture  {
         bmp.setPixels(pixels,0,bmp.getWidth(),0,0,bmp.getWidth(),bmp.getHeight());
     }
 
-    void redOnlyHsvRS(Context context){
+    void colorOnlyHsvRS(Context context, int color){
+        float[] hsvTab = new float[3];
+        Color.RGBToHSV(Color.red(color),Color.green(color),Color.blue(color), hsvTab);
         RenderScript rs = RenderScript.create(context);
 
         Allocation input = Allocation.createFromBitmap(rs,bmp);
         Allocation output = Allocation.createTyped(rs,input.getType());
 
-        ScriptC_red_only_HSV red_only_HSVScript = new ScriptC_red_only_HSV(rs);
-
-        red_only_HSVScript.forEach_red_only_hsv(input,output);
+        ScriptC_color_only_HSV color_only_HSVScript = new ScriptC_color_only_HSV(rs);
+        color_only_HSVScript.set_hue(hsvTab[0]);
+        color_only_HSVScript.forEach_color_only_hsv(input,output);
 
         output.copyTo(bmp);
 
         input.destroy(); output.destroy();
-        red_only_HSVScript.destroy(); rs.destroy();
+        color_only_HSVScript.destroy(); rs.destroy();
     }
 
 

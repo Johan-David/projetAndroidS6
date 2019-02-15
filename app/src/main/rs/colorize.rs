@@ -2,7 +2,7 @@
 #pragma  rs  java_package_name(com.example.jdavid004.projetandroids6)
 #pragma rs_fp_relaxed
 
-float rand=0;
+float color=0;
 
 uchar4  RS_KERNEL  colorize(uchar4  in) {
 
@@ -13,7 +13,7 @@ uchar4  RS_KERNEL  colorize(uchar4  in) {
     float maxRGB=max(pixelf.r,max(pixelf.g,pixelf.b));
     float deltaRGB=maxRGB-minRGB;
 
-    pixelhsv.s0=rand;
+    pixelhsv.s0=color;
 
     if(maxRGB==0){
         pixelhsv.s1=0;

@@ -6,6 +6,7 @@ import android.graphics.Bitmap;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -27,7 +28,7 @@ import yuku.ambilwarna.AmbilWarnaDialog;
 public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBarChangeListener{
     /* color picker variable */
     private int mDefaultColor = 0;
-    Button mButton;
+    private int colorPickerOption = 0;
 
 
     private ZoomageView img;
@@ -57,23 +58,22 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
 
 
         mDefaultColor = ContextCompat.getColor(MainActivity.this, R.color.colorPrimary);
-        mButton = (Button) findViewById(R.id.colorPicker);
-        mButton.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View v){
-                openColorPicker();
-            }
-        });
     }
 
 
     public void openColorPicker(){
-        AmbilWarnaDialog colorPicker = new AmbilWarnaDialog(this, mDefaultColor, new AmbilWarnaDialog.OnAmbilWarnaListener() {
+        final AmbilWarnaDialog colorPicker = new AmbilWarnaDialog(this, mDefaultColor, new AmbilWarnaDialog.OnAmbilWarnaListener() {
             public void onCancel(AmbilWarnaDialog dialog) {
 
             }
             public void onOk(AmbilWarnaDialog dialog, int color) {
                 mDefaultColor = color;
+                if(colorPickerOption == 1){
+                    currentPicture.colorizeRS(getApplicationContext(), mDefaultColor);
+                }
+                if(colorPickerOption == 2){
+                    currentPicture.colorOnlyHsvRS(getApplicationContext(), mDefaultColor);
+                }
             }
         });
         colorPicker.show();
@@ -94,6 +94,7 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
     public boolean onOptionsItemSelected(MenuItem item) {
         seekbarlum.setVisibility(View.GONE);
         textLumi.setVisibility(View.GONE);
+
         switch(item.getItemId()){
             // Cas où on clique sur la caméra pour accéder à l'appareil photo.
             case R.id.camera:
@@ -109,10 +110,12 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                 currentPicture.toGray();
                 return true;
             case R.id.colorize:
-                currentPicture.colorizeRS(getApplicationContext(), mDefaultColor);
+                colorPickerOption = 1;
+                openColorPicker();
                 return true;
             case R.id.colorOnly:
-                currentPicture.redOnlyHsvRS(getApplicationContext());
+                colorPickerOption = 2;
+                openColorPicker();
                 return true;
             case R.id.contrastDynamicExten:
                 currentPicture.contrastDynamicExtensionRGBAverage();
