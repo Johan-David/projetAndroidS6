@@ -30,6 +30,7 @@ public class Picture  {
         this.bmp = bmp;
         this.width  = bmp.getWidth();
         this.height = bmp.getHeight();
+
     }
 
     public int getWidth() {
