@@ -1,9 +1,11 @@
 package com.example.jdavid004.projetandroids6;
 
 
+import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.provider.MediaStore;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -16,10 +18,10 @@ import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.util.Log;
 
-import static java.security.AccessController.getContext;
 
 import android.widget.TextView;
 import android.widget.Toast;
+
 
 import java.io.IOException;
 
@@ -103,7 +105,7 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                 return true;
             // Cas où on clique sur la flèche pour annuler un effet.
             case R.id.reset:
-                currentPicture.setBmp(originalPicture.getBmp());
+                currentPicture = new Picture(originalPicture);
                 img.setImageBitmap(currentPicture.getBmp()); // On oublie pas de réafficher l'image
                 return true;
             case R.id.toGrey:

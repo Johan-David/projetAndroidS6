@@ -71,13 +71,17 @@ public class Save {
             Log.i("Save","ok6");
             AbleToSave();
         }
-        catch (FileNotFoundException e) {UnableToSave();}
-        catch (IOException e) {UnableToSave();}
+        catch (FileNotFoundException e) {
+            e.printStackTrace();
+            UnableToSave();}
+        catch (IOException e) {
+            e.printStackTrace();
+            UnableToSave();}
     }
 
     private String getCurrentDateAndTime(){
         Calendar c = Calendar.getInstance();
-        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss");
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss"); //Format pour la date.
         String formattedDate = df.format(c.getTime());
         return formattedDate;
     }
