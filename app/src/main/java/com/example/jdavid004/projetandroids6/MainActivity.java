@@ -26,6 +26,7 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
     private Picture copyCurrentPicture;
     private SeekBar seekbarlum;
     private TextView textLumi;
+    private static final int GALLERY_REQUEST = 1314;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,7 +57,6 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
     /**
      * Fonction utilisée pour faire le lien entre le xml et les fonctions pour les menus
      */
-
     public boolean onOptionsItemSelected(MenuItem item) {
         seekbarlum.setVisibility(View.GONE);
         textLumi.setVisibility(View.GONE);
@@ -121,9 +121,37 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                 copyCurrentPicture = new Picture(currentPicture);
                 return true;
 
+            case R.id.importFromGallery:
+                getImageFromGallery();
+                return true;
+
+            case R.id.saveImage:
+                Save saveFile = new Save();
+                saveFile.SaveImage(this,currentPicture.getBmp());
+                return true;
 
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    protected void getImageFromGallery(){
+        Intent galleryIntent = new Intent(Intent.ACTION_GET_CONTENT);
+        startActivityForResult(galleryIntent,GALLERY_REQUEST);
+
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data){
+        super.onActivityResult(requestCode,resultCode,data);
+        if(requestCode == GALLERY_REQUEST){
+            if(resultCode == Activity.RESULT_OK){
+                onSelectFromGalleryResult(data);
+            }
+        }
+    }
+
+    private void onSelectFromGalleryResult(Intent data){
+
     }
 
     @Override

@@ -76,4 +76,29 @@
         android:id="@+id/Luminosity"
         android:title="Luminosity" />
 
+    <item android:id="@+id/saveMenu"
+        android:icon="@drawable/ic_menu"
+        android:title="Save"
+        app:showAsAction="never" >
+
+        <menu>
+            <item android:id="@+id/saveImage"
+                android:title="saveImage"
+                app:showAsAction="never" ></item>
+        </menu>
+    </item>
+
+    <item android:id="@+id/importPicture"
+        android:icon="@drawable/ic_menu"
+        android:title="Import"
+        app:showAsAction="never" >
+
+        <menu>
+            <item android:id="@+id/importFromGallery"
+                android:title="saveImage"
+                app:showAsAction="never" ></item>
+        </menu>
+    </item>
+
+
 </menu>

@@ -26,22 +26,49 @@ public class Save {
 
     public void SaveImage(Context context, Bitmap ImageToSave ){
         TheThis = context;
-        String file_path = Environment.getExternalStorageDirectory().getAbsolutePath()+NameOfFolder;
+        String file_path = Environment.getDataDirectory().getAbsolutePath();
         String CurrentDateAndTime = getCurrentDateAndTime();
         File dir = new File(file_path);
 
         if(!dir.exists()){
+            Log.i("Save","dir not exists");
             dir.mkdirs();
         }
+        if(dir.exists()){
+            Log.i("Save","dir exists");
+        }
+        dir.setWritable(true);
 
+        if(dir.canWrite()){
+            Log.i("Save","canWrite");
+        }
         File file = new File(dir, NameOfFile+CurrentDateAndTime+".jpg");
 
+        if(!file.exists()){
+            Log.i("Save","file not exists");
+        }
+/*
+        Log.i("Save", "1"+String.valueOf(new File(file_path,NameOfFolder).exists()));
+        Log.i("Save", "2"+String.valueOf(new File(file_path,NameOfFolder).mkdirs()));
+        Log.i("Save", "3"+String.valueOf(new File(file_path,NameOfFolder).exists()));
+        Log.i("Save", "4"+String.valueOf(new File(file_path,NameOfFolder).isDirectory()));
+        Log.i("Save", "5"+String.valueOf(new File(file_path,NameOfFolder).getAbsolutePath()));
+
+        File dir = new File(file_path);
+        File file = new File(dir, NameOfFile+CurrentDateAndTime+".jpg");
+*/
         try {
+            Log.i("Save","ok1 file : "+file);
             FileOutputStream fOut = new FileOutputStream(file);
+            Log.i("Save","ok2");
             ImageToSave.compress(Bitmap.CompressFormat.JPEG, 85, fOut);
+            Log.i("Save","ok3");
             fOut.flush();
+            Log.i("Save","ok4");
             fOut.close();
+            Log.i("Save","ok5");
             FileCreatedAndAvailable(file);
+            Log.i("Save","ok6");
             AbleToSave();
         }
         catch (FileNotFoundException e) {UnableToSave();}
