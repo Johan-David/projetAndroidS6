@@ -20,7 +20,7 @@ import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBarChangeListener{
 
-    private ImageView img;
+    private ZoomageView img;
     private Picture originalPicture;
     private Picture currentPicture;
     private Picture copyCurrentPicture;
