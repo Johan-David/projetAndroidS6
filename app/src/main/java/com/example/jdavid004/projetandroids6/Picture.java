@@ -105,22 +105,22 @@ public class Picture  {
         bmp.setPixels(pixels,0,bmp.getWidth(),0,0,bmp.getWidth(),bmp.getHeight());
     }
 
-    void colorizeRS(Context context){
-        System.out.println("Salut on est passé par Colorize bande de chiens");
+    void colorizeRS( Context context, int color){
         RenderScript  rs = RenderScript.create(context);
 
-        Allocation  input = Allocation.createFromBitmap(rs,this.bmp);
+        Allocation  input = Allocation.createFromBitmap(rs,bmp);
         Allocation output = Allocation.createTyped(rs,input.getType());
 
         ScriptC_colorize colorizeScript = new ScriptC_colorize(rs);
 
-        Random Aleatoire = new Random();
-        float value=(float)Aleatoire.nextInt(360);
-        colorizeScript.set_rand(value);
+        float[] hsv = new float[3];
+        Color.RGBToHSV(Color.red(color), Color.green(color), Color.blue(color), hsv);
+
+        colorizeScript.set_rand(hsv[0]);
 
         colorizeScript.forEach_colorize(input,output);
 
-        output.copyTo(this.bmp);
+        output.copyTo(bmp);
 
         input.destroy(); output.destroy();
         colorizeScript.destroy(); rs.destroy();

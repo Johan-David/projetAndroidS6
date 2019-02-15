@@ -1,7 +1,6 @@
 package com.example.jdavid004.projetandroids6;
 
 
-import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.provider.MediaStore;
@@ -23,8 +22,13 @@ import android.widget.Toast;
 
 import java.io.IOException;
 
+import yuku.ambilwarna.AmbilWarnaDialog;
 
 public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBarChangeListener{
+    /* color picker variable */
+    private int mDefaultColor = 0;
+    Button mButton;
+
 
     private ImageView img;
     private Picture originalPicture;
@@ -50,6 +54,29 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
         seekbarlum.setMax(300);
         textLumi = (TextView) findViewById(R.id.textLumi);
         textLumi.setVisibility(View.GONE);
+
+
+        mDefaultColor = ContextCompat.getColor(MainActivity.this, R.color.colorPrimary);
+        mButton = (Button) findViewById(R.id.colorPicker);
+        mButton.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v){
+                openColorPicker();
+            }
+        });
+    }
+
+
+    public void openColorPicker(){
+        AmbilWarnaDialog colorPicker = new AmbilWarnaDialog(this, mDefaultColor, new AmbilWarnaDialog.OnAmbilWarnaListener() {
+            public void onCancel(AmbilWarnaDialog dialog) {
+
+            }
+            public void onOk(AmbilWarnaDialog dialog, int color) {
+                mDefaultColor = color;
+            }
+        });
+        colorPicker.show();
     }
 
     @Override
@@ -63,6 +90,7 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
     /**
      * Fonction utilisée pour faire le lien entre le xml et les fonctions pour les menus
      */
+
     public boolean onOptionsItemSelected(MenuItem item) {
         seekbarlum.setVisibility(View.GONE);
         textLumi.setVisibility(View.GONE);
@@ -81,7 +109,7 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                 currentPicture.toGray();
                 return true;
             case R.id.colorize:
-                currentPicture.colorizeRS(getApplicationContext());
+                currentPicture.colorizeRS(getApplicationContext(), mDefaultColor);
                 return true;
             case R.id.colorOnly:
                 currentPicture.redOnlyHsvRS(getApplicationContext());
