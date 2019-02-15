@@ -95,7 +95,7 @@
 
         <menu>
             <item android:id="@+id/importFromGallery"
-                android:title="saveImage"
+                android:title="importImageFromGallery"
                 app:showAsAction="never" ></item>
         </menu>
     </item>
