@@ -26,6 +26,12 @@ public class Picture  {
         return bmp;
     }
 
+    public void setBmp(Bitmap bmp) {
+        this.bmp = bmp;
+        this.width  = bmp.getWidth();
+        this.height = bmp.getHeight();
+    }
+
     public int getWidth() {
         return width;
     }
@@ -54,9 +60,9 @@ public class Picture  {
         this.tabPixels = picture.getTabPixels();
     }
 
-    void toGray(Bitmap bmp){
+    void toGray(){
         int[] pixels = new int[bmp.getHeight()*bmp.getWidth()];
-        bmp.getPixels(pixels,0,bmp.getWidth(),0,0,bmp.getWidth(),bmp.getHeight());
+        this.bmp.getPixels(pixels,0,bmp.getWidth(),0,0,bmp.getWidth(),bmp.getHeight());
 
         for(int i = 0; i < pixels.length; i++){
             int R = Color.red(pixels[i]);
@@ -65,10 +71,10 @@ public class Picture  {
             int Grey = (int)(0.3*R+0.59*G+0.11*B);
             pixels[i] = Color.rgb(Grey,Grey,Grey);
         }
-        bmp.setPixels(pixels,0,bmp.getWidth(),0,0,bmp.getWidth(),bmp.getHeight());
+        this.bmp.setPixels(pixels,0,bmp.getWidth(),0,0,bmp.getWidth(),bmp.getHeight());
     }
 
-    void toGreyRS(Bitmap bmp, Context context){
+    void toGreyRS(Context context){
         RenderScript rs = RenderScript.create(context);
 
         Allocation input = Allocation.createFromBitmap(rs,bmp);
@@ -84,7 +90,7 @@ public class Picture  {
         greyScript.destroy(); rs.destroy();
     }
 
-    void colorize(Bitmap bmp){
+    void colorize(){
         int[] pixels = new int[bmp.getHeight()*bmp.getWidth()];
         bmp.getPixels(pixels,0,bmp.getWidth(),0,0,bmp.getWidth(),bmp.getHeight());
         float[] hsv = new float[3];
@@ -99,7 +105,7 @@ public class Picture  {
         bmp.setPixels(pixels,0,bmp.getWidth(),0,0,bmp.getWidth(),bmp.getHeight());
     }
 
-    void colorizeRS(Bitmap bmp, Context context){
+    void colorizeRS( Context context, int color){
         RenderScript  rs = RenderScript.create(context);
 
         Allocation  input = Allocation.createFromBitmap(rs,bmp);
@@ -107,9 +113,10 @@ public class Picture  {
 
         ScriptC_colorize colorizeScript = new ScriptC_colorize(rs);
 
-        Random Aleatoire = new Random();
-        float value=(float)Aleatoire.nextInt(360);
-        colorizeScript.set_rand(value);
+        float[] hsv = new float[3];
+        Color.RGBToHSV(Color.red(color), Color.green(color), Color.blue(color), hsv);
+
+        colorizeScript.set_rand(hsv[0]);
 
         colorizeScript.forEach_colorize(input,output);
 
@@ -119,7 +126,7 @@ public class Picture  {
         colorizeScript.destroy(); rs.destroy();
     }
 
-    void redOnlyHsv(Bitmap bmp){
+    void redOnlyHsv(){
         int[] pixels = new int[bmp.getHeight()*bmp.getWidth()];
         bmp.getPixels(pixels,0,bmp.getWidth(),0,0,bmp.getWidth(),bmp.getHeight());
         float[] hsv = new float[3];
@@ -137,7 +144,7 @@ public class Picture  {
         bmp.setPixels(pixels,0,bmp.getWidth(),0,0,bmp.getWidth(),bmp.getHeight());
     }
 
-    void redOnlyHsvRS(Bitmap bmp, Context context){
+    void redOnlyHsvRS(Context context){
         RenderScript rs = RenderScript.create(context);
 
         Allocation input = Allocation.createFromBitmap(rs,bmp);
@@ -154,7 +161,7 @@ public class Picture  {
     }
 
 
-    void contrastDynamicExtensionGrey(Bitmap bmp){
+    void contrastDynamicExtensionGrey(){
         int[] pixels = new int[bmp.getHeight()*bmp.getWidth()];
         bmp.getPixels(pixels,0,bmp.getWidth(),0,0,bmp.getWidth(),bmp.getHeight());
         int min = 255;
@@ -190,7 +197,7 @@ public class Picture  {
         bmp.setPixels(pixels,0,bmp.getWidth(),0,0,bmp.getWidth(),bmp.getHeight());
     }
 
-    void contrastDynamicExtensionRGBIndie(Bitmap bmp){
+    void contrastDynamicExtensionRGBIndie(){
         int[] pixels = new int[bmp.getHeight()*bmp.getWidth()];
         bmp.getPixels(pixels,0,bmp.getWidth(),0,0,bmp.getWidth(),bmp.getHeight());
         int minRed = 255;
@@ -274,7 +281,7 @@ public class Picture  {
         bmp.setPixels(pixels,0,bmp.getWidth(),0,0,bmp.getWidth(),bmp.getHeight());
     }
 
-    void contrastDynamicExtensionRGBAverage(Bitmap bmp){
+    void contrastDynamicExtensionRGBAverage(){
         int[] pixels = new int[bmp.getHeight()*bmp.getWidth()];
         bmp.getPixels(pixels,0,bmp.getWidth(),0,0,bmp.getWidth(),bmp.getHeight());
         int min = 255;
@@ -316,7 +323,7 @@ public class Picture  {
     }
 
 
-    void contrastHistogramEqualizationGrey(Bitmap bmp){
+    void contrastHistogramEqualizationGrey(){
         int[] pixels = new int[bmp.getHeight()*bmp.getWidth()];
         bmp.getPixels(pixels,0,bmp.getWidth(),0,0,bmp.getWidth(),bmp.getHeight());
         int[] H = new int[256];
@@ -342,7 +349,7 @@ public class Picture  {
         bmp.setPixels(pixels,0,bmp.getWidth(),0,0,bmp.getWidth(),bmp.getHeight());
     }
 
-    void contrastHistogramEqualizationRGBIndie(Bitmap bmp){
+    void contrastHistogramEqualizationRGBIndie(){
         int[] pixels = new int[bmp.getHeight()*bmp.getWidth()];
         bmp.getPixels(pixels,0,bmp.getWidth(),0,0,bmp.getWidth(),bmp.getHeight());
         int[] Hr = new int[256];
@@ -380,7 +387,7 @@ public class Picture  {
         bmp.setPixels(pixels,0,bmp.getWidth(),0,0,bmp.getWidth(),bmp.getHeight());
     }
 
-    void contrastHistogramEqualizationRGBAverage(Bitmap bmp){
+    void contrastHistogramEqualizationRGBAverage(){
         int[] pixels = new int[bmp.getHeight()*bmp.getWidth()];
         bmp.getPixels(pixels,0,bmp.getWidth(),0,0,bmp.getWidth(),bmp.getHeight());
         int[] H = new int[256];
@@ -410,7 +417,7 @@ public class Picture  {
         bmp.setPixels(pixels,0,bmp.getWidth(),0,0,bmp.getWidth(),bmp.getHeight());
     }
 
-    void contrastHistogramEqualizationYuvRS(Bitmap bmp,Context context){
+    void contrastHistogramEqualizationYuvRS(Context context){
         //Get image size
         int width = bmp.getWidth();
         int height = bmp.getHeight();
