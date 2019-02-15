@@ -2,6 +2,7 @@ package com.example.jdavid004.projetandroids6;
 
 
 import android.content.Intent;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -17,8 +18,13 @@ import static java.security.AccessController.getContext;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import yuku.ambilwarna.AmbilWarnaDialog;
 
 public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBarChangeListener{
+    /* color picker variable */
+    private int mDefaultColor = 0;
+    Button mButton;
+
 
     private ImageView img;
     private Picture originalPicture;
@@ -43,6 +49,29 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
         seekbarlum.setMax(300);
         textLumi = (TextView) findViewById(R.id.textLumi);
         textLumi.setVisibility(View.GONE);
+
+
+        mDefaultColor = ContextCompat.getColor(MainActivity.this, R.color.colorPrimary);
+        mButton = (Button) findViewById(R.id.colorPicker);
+        mButton.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v){
+                openColorPicker();
+            }
+        });
+    }
+
+
+    public void openColorPicker(){
+        AmbilWarnaDialog colorPicker = new AmbilWarnaDialog(this, mDefaultColor, new AmbilWarnaDialog.OnAmbilWarnaListener() {
+            public void onCancel(AmbilWarnaDialog dialog) {
+
+            }
+            public void onOk(AmbilWarnaDialog dialog, int color) {
+                mDefaultColor = color;
+            }
+        });
+        colorPicker.show();
     }
 
     @Override
@@ -65,20 +94,53 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                 Intent intent = new Intent("android.media.action.IMAGE_CAPTURE");
                 startActivityForResult(intent,0);
                 return true;
+            // Cas où on clique sur la flèche pour annuler un effet.
+            case R.id.reset:
+                currentPicture.setBmp(originalPicture.getBmp());
+                img.setImageBitmap(currentPicture.getBmp()); // On oublie pas de réafficher l'image
+                return true;
             case R.id.toGrey:
-                currentPicture.toGray(currentPicture.getBmp());
+                currentPicture.toGray();
                 return true;
             case R.id.colorize:
-                currentPicture.colorizeRS(currentPicture.getBmp(),getApplicationContext());
+                currentPicture.colorizeRS(getApplicationContext(), mDefaultColor);
                 return true;
             case R.id.colorOnly:
-                currentPicture.redOnlyHsvRS(currentPicture.getBmp(),getApplicationContext());
+                currentPicture.redOnlyHsvRS(getApplicationContext());
                 return true;
             case R.id.contrastDynamicExten:
-                currentPicture.contrastDynamicExtensionRGBAverage(currentPicture.getBmp());
+                currentPicture.contrastDynamicExtensionRGBAverage();
                 return true;
             case R.id.contrastEqualHisto:
-                currentPicture.contrastHistogramEqualizationYuvRS(currentPicture.getBmp(),getApplicationContext());
+                currentPicture.contrastHistogramEqualizationYuvRS(getApplicationContext());
+                return true;
+            case R.id.prewitt:
+                int[][] matrice = new int[3][3];
+                matrice[0][0] = -1;
+                matrice[0][1] = 0;
+                matrice[0][2] = 1;
+                matrice[1][0] = -1;
+                matrice[1][1] = 0;
+                matrice[1][2] = 1;
+                matrice[2][0] = -1;
+                matrice[2][1] = 0;
+                matrice[2][2] = 1;
+                Convolution contourPrewitt = new Convolution(matrice, 3, 3,true);
+                contourPrewitt.compute(currentPicture.getBmp());
+            case R.id.sobel:
+                int[][] matrix = new int[3][3];
+                matrix[0][0] = -1;
+                matrix[0][1] = 0;
+                matrix[0][2] = 1;
+                matrix[1][0] = -2;
+                matrix[1][1] = 0;
+                matrix[1][2] = 2;
+                matrix[2][0] = -1;
+                matrix[2][1] = 0;
+                matrix[2][2] = 1;
+                Convolution contourSobel= new Convolution(matrix, 3, 3,true);
+                contourSobel.compute(currentPicture.getBmp());
+                currentPicture.contrastHistogramEqualizationYuvRS(getApplicationContext());
                 return true;
             case R.id.Luminosity:
                 seekbarlum.setProgress(100);
@@ -87,14 +149,6 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                 copyCurrentPicture = new Picture(currentPicture);
                 return true;
 
-
-
-            case R.id.contrastMenu:                                                     // Aide juste au debug
-                Toast.makeText(this,"menu selected", Toast.LENGTH_SHORT);
-                return true;
-            case R.id.convolutionMenu:
-                Toast.makeText(this,"menu selected", Toast.LENGTH_SHORT);
-                return true;
 
         }
         return super.onOptionsItemSelected(item);
