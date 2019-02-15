@@ -7,6 +7,12 @@
         android:title="camera"
         app:showAsAction="ifRoom" ></item>
 
+    <item android:id="@+id/reset"
+        android:icon="@drawable/ic_reset"
+        android:title="reset"
+        app:showAsAction="ifRoom" ></item>
+
+
     <item android:id="@+id/colorMenu"
         android:icon="@drawable/ic_menu"
         android:title="Color"
