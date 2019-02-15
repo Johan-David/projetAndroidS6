@@ -2,7 +2,8 @@ package com.example.jdavid004.projetandroids6;
 
 
 import android.content.Intent;
-import android.support.v4.content.ContextCompat;
+import android.graphics.Bitmap;
+import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -13,11 +14,14 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.SeekBar;
+import android.util.Log;
 
 import static java.security.AccessController.getContext;
 
 import android.widget.TextView;
 import android.widget.Toast;
+
+import java.io.IOException;
 
 import yuku.ambilwarna.AmbilWarnaDialog;
 
@@ -33,6 +37,7 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
     private Picture copyCurrentPicture;
     private SeekBar seekbarlum;
     private TextView textLumi;
+    private static final int GALLERY_REQUEST = 1314;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,6 +90,7 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
     /**
      * Fonction utilisée pour faire le lien entre le xml et les fonctions pour les menus
      */
+
     public boolean onOptionsItemSelected(MenuItem item) {
         seekbarlum.setVisibility(View.GONE);
         textLumi.setVisibility(View.GONE);
@@ -152,9 +158,50 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                 copyCurrentPicture = new Picture(currentPicture);
                 return true;
 
+            case R.id.importFromGallery:
+                getImageFromGallery();
+                return true;
+
+            case R.id.saveImage:
+                Save saveFile = new Save();
+                saveFile.SaveImage(this,currentPicture.getBmp());
+                return true;
 
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    protected void getImageFromGallery(){
+        Intent galleryIntent = new Intent(Intent.ACTION_GET_CONTENT);
+        startActivityForResult(galleryIntent,GALLERY_REQUEST);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data){
+        Log.i("MainActivity","dans onActivityResult");
+        super.onActivityResult(requestCode,resultCode,data);
+        Log.i("MainActivity","dans onActivityResult2");
+        if(requestCode == GALLERY_REQUEST){
+            if(resultCode == Activity.RESULT_OK){
+                Log.i("MainActivity","dans les if");
+                onSelectFromGalleryResult(data);
+            }
+        }
+    }
+
+    private void onSelectFromGalleryResult(Intent data){
+        Log.i("MainActivity","dans onSelectedFromGallery");
+        Bitmap bmp = currentPicture.getBmp();
+        if(data != null){
+            try{
+                Log.i("MainActivity","dans le try");
+                bmp = MediaStore.Images.Media.getBitmap(getContentResolver(),data.getData());
+            }catch (IOException e ){
+                Toast.makeText(this, "Failed to access to gallery", Toast.LENGTH_SHORT).show();
+            }
+            currentPicture.setBmp(bmp);
+            img.setImageBitmap(currentPicture.getBmp());
+        }
     }
 
     @Override
