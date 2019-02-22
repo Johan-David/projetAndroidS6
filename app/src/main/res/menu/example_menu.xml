@@ -57,9 +57,11 @@
 
         <menu>
             <item
-                android:id="@+id/averaging"
+                android:id="@+id/moyenneur"
                 android:title="Moyenneur" />
-            <item android:title="Gaussien" />
+            <item
+                android:id="@+id/gaussien"
+                android:title="Gaussien" />
         </menu>
     </item>
     <item android:title="Contour">

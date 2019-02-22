@@ -103,28 +103,46 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
             case R.id.camera:
                 getImageFromCamera();
                 return true;
+
             // Cas où on clique sur la flèche pour annuler un effet.
             case R.id.reset:
                 currentPicture = new Picture(originalPicture);
                 img.setImageBitmap(currentPicture.getBmp()); // On oublie pas de réafficher l'image
                 return true;
+
             case R.id.toGrey:
-                currentPicture.toGray();
+                currentPicture.toGreyRS(getApplicationContext());
                 return true;
+
             case R.id.colorize:
                 colorPickerOption = 1;
                 openColorPicker();
                 return true;
+
             case R.id.colorOnly:
                 colorPickerOption = 2;
                 openColorPicker();
                 return true;
+
             case R.id.contrastDynamicExten:
                 currentPicture.contrastDynamicExtensionRGBAverage();
                 return true;
+
             case R.id.contrastEqualHisto:
                 currentPicture.contrastHistogramEqualizationYuvRS(getApplicationContext());
                 return true;
+
+            case R.id.moyenneur:
+                int[][] matriceMoy = new int[3][3];
+                for(int i = 0; i < 3; i++){
+                    for(int j = 0; j < 3; j++){
+                        matriceMoy[i][j]=1;
+                    }
+                }
+                Convolution blur3x3 = new Convolution(currentPicture, matriceMoy, 3, 3, false);
+                blur3x3.compute();
+                return true;
+
             case R.id.prewitt:
                 int[][] matrice = new int[3][3];
                 matrice[0][0] = -1;
@@ -136,8 +154,10 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                 matrice[2][0] = -1;
                 matrice[2][1] = 0;
                 matrice[2][2] = 1;
-                Convolution contourPrewitt = new Convolution(matrice, 3, 3,true);
-                contourPrewitt.compute(currentPicture.getBmp());
+                Convolution contourPrewitt = new Convolution(currentPicture, matrice, 3, 3,true);
+                contourPrewitt.compute();
+                return true;
+
             case R.id.sobel:
                 int[][] matrix = new int[3][3];
                 matrix[0][0] = -1;
@@ -149,10 +169,10 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                 matrix[2][0] = -1;
                 matrix[2][1] = 0;
                 matrix[2][2] = 1;
-                Convolution contourSobel= new Convolution(matrix, 3, 3,true);
-                contourSobel.compute(currentPicture.getBmp());
-                currentPicture.contrastHistogramEqualizationYuvRS(getApplicationContext());
+                Convolution contourSobel= new Convolution(currentPicture, matrix, 3, 3,true);
+                contourSobel.compute();
                 return true;
+
             case R.id.Luminosity:
                 seekbarlum.setProgress(100);
                 seekbarlum.setVisibility(View.VISIBLE);
