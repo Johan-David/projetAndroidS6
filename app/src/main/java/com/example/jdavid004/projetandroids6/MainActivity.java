@@ -33,13 +33,14 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
     private int colorPickerOption = 0;
 
 
-    private ImageView img;
+    private ZoomageView img;
     private Picture originalPicture;
     private Picture currentPicture;
     private Picture copyCurrentPicture;
     private SeekBar seekbarlum;
     private TextView textLumi;
     private static final int GALLERY_REQUEST = 1314;
+    private static final int CAMERA_REQUEST = 1315;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,8 +101,7 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
         switch(item.getItemId()){
             // Cas où on clique sur la caméra pour accéder à l'appareil photo.
             case R.id.camera:
-                Intent intent = new Intent("android.media.action.IMAGE_CAPTURE");
-                startActivityForResult(intent,0);
+                getImageFromCamera();
                 return true;
             // Cas où on clique sur la flèche pour annuler un effet.
             case R.id.reset:
@@ -109,7 +109,7 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                 img.setImageBitmap(currentPicture.getBmp()); // On oublie pas de réafficher l'image
                 return true;
             case R.id.toGrey:
-                currentPicture.toGray();
+                currentPicture.toGreyRS(getApplicationContext());
                 return true;
             case R.id.colorize:
                 colorPickerOption = 1;
@@ -173,36 +173,52 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
         return super.onOptionsItemSelected(item);
     }
 
+    protected void getImageFromCamera(){
+        Intent cameraIntent = new Intent("android.media.action.IMAGE_CAPTURE");
+        startActivityForResult(cameraIntent,CAMERA_REQUEST);
+    }
+
+    //crée l'intent et lance l'activité
     protected void getImageFromGallery(){
-        Intent galleryIntent = new Intent(Intent.ACTION_GET_CONTENT);
+        Intent galleryIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         startActivityForResult(galleryIntent,GALLERY_REQUEST);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data){
-        Log.i("MainActivity","dans onActivityResult");
         super.onActivityResult(requestCode,resultCode,data);
-        Log.i("MainActivity","dans onActivityResult2");
-        if(requestCode == GALLERY_REQUEST){
+        if(requestCode == GALLERY_REQUEST){ //si la requête est l'accès à la galerie
             if(resultCode == Activity.RESULT_OK){
-                Log.i("MainActivity","dans les if");
                 onSelectFromGalleryResult(data);
             }
+        }else if(requestCode == CAMERA_REQUEST){
+            if(resultCode == Activity.RESULT_OK){
+                onCaptureImageResult(data);
+            }
+
         }
     }
 
     private void onSelectFromGalleryResult(Intent data){
-        Log.i("MainActivity","dans onSelectedFromGallery");
         Bitmap bmp = currentPicture.getBmp();
         if(data != null){
             try{
-                Log.i("MainActivity","dans le try");
                 bmp = MediaStore.Images.Media.getBitmap(getContentResolver(),data.getData());
             }catch (IOException e ){
                 Toast.makeText(this, "Failed to access to gallery", Toast.LENGTH_SHORT).show();
             }
             currentPicture.setBmp(bmp);
             img.setImageBitmap(currentPicture.getBmp());
+        }
+    }
+
+    private void onCaptureImageResult(Intent data){
+        if(data != null){
+            Bitmap bmp = (Bitmap) data.getExtras().get("data");
+            currentPicture.setBmp(bmp);
+            img.setImageBitmap(currentPicture.getBmp());
+            originalPicture.setBmp(bmp);
+            img.setImageBitmap(originalPicture.getBmp());
         }
     }
 
