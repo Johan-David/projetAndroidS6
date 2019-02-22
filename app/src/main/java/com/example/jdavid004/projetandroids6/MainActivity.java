@@ -109,7 +109,7 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                 img.setImageBitmap(currentPicture.getBmp()); // On oublie pas de réafficher l'image
                 return true;
             case R.id.toGrey:
-                currentPicture.toGray();
+                currentPicture.toGreyRS(getApplicationContext());
                 return true;
             case R.id.colorize:
                 colorPickerOption = 1;
@@ -180,7 +180,7 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
 
     //crée l'intent et lance l'activité
     protected void getImageFromGallery(){
-        Intent galleryIntent = new Intent(Intent.ACTION_PICK);
+        Intent galleryIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         startActivityForResult(galleryIntent,GALLERY_REQUEST);
     }
 
