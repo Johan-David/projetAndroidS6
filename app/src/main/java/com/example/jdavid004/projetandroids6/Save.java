@@ -25,50 +25,28 @@ public class Save {
     private String NameOfFile = "MyImage";
 
     public void SaveImage(Context context, Bitmap ImageToSave ){
-        TheThis = context;
-        String file_path = Environment.getDataDirectory().getAbsolutePath();
-        String CurrentDateAndTime = getCurrentDateAndTime();
-        File dir = new File(file_path);
-
-        if(!dir.exists()){
-            Log.i("Save","dir not exists");
-            dir.mkdirs();
-        }
-        if(dir.exists()){
-            Log.i("Save","dir exists");
-        }
+        TheThis = context;  //prend le context actuel
+        String file_path = TheThis.getFilesDir().getPath()+NameOfFolder;  //nom du chemin dans lequel enregistrer l'image
+        String CurrentDateAndTime = getCurrentDateAndTime();  //écrit la date et l'heure actuelles
+        File dir = new File(file_path);   // crée le répertoire à partir du nom du chemin
         dir.setWritable(true);
 
-        if(dir.canWrite()){
-            Log.i("Save","canWrite");
+        if(!dir.exists()){
+            dir.mkdirs();
         }
+
+
+
+
         File file = new File(dir, NameOfFile+CurrentDateAndTime+".jpg");
 
-        if(!file.exists()){
-            Log.i("Save","file not exists");
-        }
-/*
-        Log.i("Save", "1"+String.valueOf(new File(file_path,NameOfFolder).exists()));
-        Log.i("Save", "2"+String.valueOf(new File(file_path,NameOfFolder).mkdirs()));
-        Log.i("Save", "3"+String.valueOf(new File(file_path,NameOfFolder).exists()));
-        Log.i("Save", "4"+String.valueOf(new File(file_path,NameOfFolder).isDirectory()));
-        Log.i("Save", "5"+String.valueOf(new File(file_path,NameOfFolder).getAbsolutePath()));
 
-        File dir = new File(file_path);
-        File file = new File(dir, NameOfFile+CurrentDateAndTime+".jpg");
-*/
         try {
-            Log.i("Save","ok1 file : "+file);
-            FileOutputStream fOut = new FileOutputStream(file);
-            Log.i("Save","ok2");
-            ImageToSave.compress(Bitmap.CompressFormat.JPEG, 85, fOut);
-            Log.i("Save","ok3");
+            FileOutputStream fOut = new FileOutputStream(file);  //crée un stream à partir du fichier
+            ImageToSave.compress(Bitmap.CompressFormat.JPEG, 85, fOut);  //compresse l'image et l'écrit dans le stream
             fOut.flush();
-            Log.i("Save","ok4");
             fOut.close();
-            Log.i("Save","ok5");
-            FileCreatedAndAvailable(file);
-            Log.i("Save","ok6");
+            FileCreatedAndAvailable(file);  //vérifie si le fichier a été crée et le rend utilisable
             AbleToSave();
         }
         catch (FileNotFoundException e) {
