@@ -45,6 +45,12 @@ public class Picture  {
         return tabPixels;
     }
 
+    Picture(Bitmap bmp){
+        this.bmp = bmp;
+        this.width  = bmp.getWidth();
+        this.height = bmp.getHeight();
+    }
+
     Picture(Resources resources) {
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inMutable = true;
