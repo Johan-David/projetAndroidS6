@@ -20,17 +20,29 @@ import java.util.Date;
  * Created by jdavid004 on 26/02/19.
  */
 
+/**
+ * Class Camera : contains all the necessary methods to take an image and load it from the gallery
+ */
 
 public class Camera {
 
     private static final int GALLERY_REQUEST = 1314;
     private static final int REQUEST_TAKE_PHOTO = 1;
 
-
+    /**
+     * Main context
+     */
     private Context TheThis;
 
+    /**
+     * Main activity
+     */
     private Activity activity;
 
+    /**
+     * Constructor
+     * @param TheThis
+     */
 
     Camera(Context TheThis){
         this.TheThis = TheThis;
@@ -38,8 +50,8 @@ public class Camera {
     }
 
     /**
-     * Créé un fichier  pour sauvegarder l'image prise par
-     * @return
+     * Create a file to save the image taken by
+     * @return image creates
      * @throws IOException
      */
 
@@ -57,6 +69,11 @@ public class Camera {
         // Save a file: path for use with ACTION_VIEW intents
         return image;
     }
+
+    /**
+     * take a photo and save it
+     * @return the name of photo created
+     */
 
     public String dispatchTakePictureIntent() {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
@@ -87,13 +104,22 @@ public class Camera {
 
     }
 
-    //crée l'intent et lance l'activité
-    //FAIT
+    /**
+     * create the intent and launch the activity
+     */
+
     protected void getImageFromGallery(){
         Intent galleryIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         activity.startActivityForResult(galleryIntent,GALLERY_REQUEST);
     }
 
+    /**
+     * load an image from the gallery
+     * @param data
+     * @param currentPicture
+     * @param originalPicture
+     * @param img
+     */
 
     public void onSelectFromGalleryResult(Intent data, Picture currentPicture, Picture originalPicture, ZoomageView img){
         Bitmap bmp = currentPicture.getBmp();
@@ -109,5 +135,4 @@ public class Camera {
 
         }
     }
-
 }
