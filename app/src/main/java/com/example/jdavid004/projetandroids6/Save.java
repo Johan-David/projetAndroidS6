@@ -8,14 +8,9 @@ import android.os.Environment;
 import android.util.Log;
 import android.widget.Toast;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.ByteBuffer;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
@@ -23,45 +18,59 @@ import java.util.Calendar;
  * Created by achauveau003 on 01/02/19.
  */
 
+
+/**
+ * class Save : contains all the necessary methods to save an image
+ */
 public class Save {
-    private Context TheThis;
-    private String NameOfFolder = "ApplicationImage";
-    private String NameOfFile = "MyImage";
+    private Context TheThis;    //gets the current context
+    private String NameOfFolder = "ApplicationImage";   //name of the folder that will contain all the pictures saved by the application
+    private String NameOfFile = "MyImage";  //prefix name common to all the pictures
 
-    public void SaveImage(Context context, Bitmap ImageToSave ){
-        TheThis = context;  //prend le context actuel
+    /**
+     * SaveImage : main method, saves the image given by imageToSave in the gallery
+     * @param context : current context of the application
+     * @param imageToSave : bitmap of the image to save
+     */
+    public void SaveImage(Context context, Bitmap imageToSave ){
+        TheThis = context;
 
-        String CurrentDateAndTime = getCurrentDateAndTime();  //écrit la date et l'heure actuelles
-        String pictureName = NameOfFile+CurrentDateAndTime+".png"; //nom de l'image à enregistrer
-
-        OutputStream fOut;
+        String currentDateAndTime = getCurrentDateAndTime();
+        String pictureName = NameOfFile+currentDateAndTime+".png"; //complete name of the picture to save
 
         try {
-            //root : crée le chemin pour enregistrer l'image
+            //root : file representing the path in where to save the image
             File root = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES) + File.separator + NameOfFolder + File.separator);
-            root.mkdirs(); //crée le sous-dossier si nécessaire
-            File sdImageMainDirectory = new File(root, pictureName); //crée le fichier pour l'image
-            fOut = new FileOutputStream(sdImageMainDirectory); //crée un stream pour écrire la bitmap
-            ImageToSave.compress(Bitmap.CompressFormat.PNG, 100, fOut); //compresse l'image vers le stream
-            fOut.flush();  //vide le buffer
-            fOut.close();  //ferme le fichier stream
-            FileCreatedAndAvailable(sdImageMainDirectory);  //vérifie si le fichier a été crée et le rend utilisable
-            AbleToSave();
+            root.mkdirs(); //creates the folder if necessary
+            File imageFile = new File(root, pictureName); //file representing the image
+            OutputStream fOut = new FileOutputStream(imageFile); //file output stream in where to write the bitmap
+            imageToSave.compress(Bitmap.CompressFormat.PNG, 100, fOut); //compress the bitmap and writes it into the output stream
+            fOut.flush();  //empty the buffer
+            fOut.close();  //close the file output stream
+            fileCreatedAndAvailable(imageFile);
+            ableToSave();
 
         } catch (Exception e) {
             e.printStackTrace();
-            UnableToSave();
+            unableToSave();
         }
     }
 
+    /**
+     * getCurrentDateAndTime : gets the current date and time and converts it into a String
+     * @return String : formattedDate
+     */
     private String getCurrentDateAndTime(){
         Calendar c = Calendar.getInstance();
-        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss"); //Format pour la date.
-        String formattedDate = df.format(c.getTime());
-        return formattedDate;
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss");
+        return df.format(c.getTime()); //formatted date
     }
 
-    private void FileCreatedAndAvailable(File file){
+    /**
+     * fileCreatedAndAvailable : makes sure the file has been created and makes it available for all the applications
+     * @param file : file to test
+     */
+    private void fileCreatedAndAvailable(File file){
         MediaScannerConnection.scanFile(TheThis, new String[]{file.toString()}, null, new MediaScannerConnection.OnScanCompletedListener() {
             @Override
             public void onScanCompleted(String path, Uri uri) {
@@ -71,11 +80,17 @@ public class Save {
         });
     }
 
-    private void UnableToSave() {
+    /**
+     * unableToSave : displays an error message
+     */
+    private void unableToSave() {
         Toast.makeText(TheThis, "Failed to access to gallery", Toast.LENGTH_SHORT).show();
     }
 
-    private void AbleToSave() {
+    /**
+     * ableToSave : displays a message to confirm that the picture has been saved
+     */
+    private void ableToSave() {
         Toast.makeText(TheThis, "Picture saved in gallery", Toast.LENGTH_SHORT).show();
     }
 }
