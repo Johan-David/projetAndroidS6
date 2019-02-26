@@ -67,7 +67,7 @@ public class Picture  {
         this.tabPixels = picture.getTabPixels();
     }
 
-    void toGray(){
+    void toGrey(){
         int[] pixels = new int[bmp.getHeight()*bmp.getWidth()];
         this.bmp.getPixels(pixels,0,bmp.getWidth(),0,0,bmp.getWidth(),bmp.getHeight());
 

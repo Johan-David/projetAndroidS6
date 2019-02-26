@@ -242,6 +242,7 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                         e.printStackTrace();
                     }
                     if(imageBitmap != null){
+                        originalPicture = new Picture(imageBitmap);
                         currentPicture = new Picture(imageBitmap);
                         img.setImageBitmap(imageBitmap);
                         galleryAddPic();
