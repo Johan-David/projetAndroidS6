@@ -46,7 +46,7 @@ public class Picture  {
     }
 
     Picture(Bitmap bmp){
-        this.bmp = bmp;
+        this.bmp = bmp.copy(bmp.getConfig(),true);
         this.width  = bmp.getWidth();
         this.height = bmp.getHeight();
     }

@@ -23,30 +23,6 @@ import java.util.Calendar;
  * Created by achauveau003 on 01/02/19.
  */
 
-
-/*private void savePictureToGallery() {
-        // Get the Bitmap from the ImageView
-        imageView.buildDrawingCache();
-        Bitmap bitmap = imageView.getDrawingCache();
-
-        OutputStream fOut = null;
-        Uri outputFileUri;
-        try {
-        File root = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES) + File.separator + "MySuperApp" + File.separator);
-        root.mkdirs();
-        File sdImageMainDirectory = new File(root, "myPicName.jpg");
-        outputFileUri = Uri.fromFile(sdImageMainDirectory);
-        System.out.println(outputFileUri);
-        fOut = new FileOutputStream(sdImageMainDirectory);
-
-        bitmap.compress(Bitmap.CompressFormat.PNG, 100, fOut);
-        fOut.flush();
-        fOut.close();
-        } catch (Exception e) {
-        Toast.makeText(this, "Error occured. Please try again later.", Toast.LENGTH_SHORT).show();
-        }
-        }*/
-
 public class Save {
     private Context TheThis;
     private String NameOfFolder = "ApplicationImage";

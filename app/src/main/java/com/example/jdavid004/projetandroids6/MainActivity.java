@@ -38,16 +38,15 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
     private int colorPickerOption = 0;
 
 
-    private ZoomageView img;
-    private Picture originalPicture;
-    private Picture currentPicture;
-    private Picture copyCurrentPicture;
+    private ZoomageView imageView;
+    private Picture originalPictureUse;
+    private Picture currentPictureUse;
+    private Picture copycurrentPictureUse;
     private SeekBar seekbarlum;
     private TextView textLumi;
     private String currentPhotoPath;
     private static final int GALLERY_REQUEST = 1314;
-    static final int REQUEST_IMAGE_CAPTURE = 1;
-    static final int REQUEST_TAKE_PHOTO = 1;
+    private static final int REQUEST_TAKE_PHOTO = 1;
 
 
 
@@ -56,10 +55,10 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        img = findViewById(R.id.vegetablePicture);
-        originalPicture = new Picture(getResources());
-        currentPicture = new Picture(originalPicture);
-        img.setImageBitmap(currentPicture.getBmp());
+        imageView = findViewById(R.id.vegetablePicture);
+        originalPictureUse = new Picture(getResources());
+        currentPictureUse = new Picture(originalPictureUse);
+        imageView.setImageBitmap(currentPictureUse.getBmp());
 
         seekbarlum = (SeekBar)findViewById(R.id.seekbarlum);
         seekbarlum.setVisibility(View.GONE);
@@ -81,10 +80,10 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
             public void onOk(AmbilWarnaDialog dialog, int color) {
                 mDefaultColor = color;
                 if(colorPickerOption == 1){
-                    currentPicture.colorizeRS(getApplicationContext(), mDefaultColor);
+                    currentPictureUse.colorizeRS(getApplicationContext(), mDefaultColor);
                 }
                 if(colorPickerOption == 2){
-                    currentPicture.colorOnlyHsvRS(getApplicationContext(), mDefaultColor);
+                    currentPictureUse.colorOnlyHsvRS(getApplicationContext(), mDefaultColor);
                 }
             }
         });
@@ -92,7 +91,10 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) { // Met en place le menu pour choisir les différents traitements d'images.
+    /**
+     * Set up the menu to choose the different image processing options.
+     */
+    public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.example_menu, menu);
         return true;
@@ -100,7 +102,7 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
 
     @Override
     /**
-     * Fonction utilisée pour faire le lien entre le xml et les fonctions pour les menus
+     * Organise the different menu use by the application. It's a link between the method use for a picture and the  xml file : example_menu.xml
      */
 
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -114,11 +116,12 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                 return true;
             // Cas où on clique sur la flèche pour annuler un effet.
             case R.id.reset:
-                currentPicture = new Picture(originalPicture);
-                img.setImageBitmap(currentPicture.getBmp()); // On oublie pas de réafficher l'image
+                currentPictureUse = new Picture(originalPictureUse);
+                imageView.setImageBitmap(currentPictureUse.getBmp()); // On oublie pas de réafficher l'image
+
                 return true;
             case R.id.toGrey:
-                currentPicture.toGreyRS(getApplicationContext());
+                currentPictureUse.toGreyRS(getApplicationContext());
                 return true;
             case R.id.colorize:
                 colorPickerOption = 1;
@@ -129,10 +132,10 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                 openColorPicker();
                 return true;
             case R.id.contrastDynamicExten:
-                currentPicture.contrastDynamicExtensionRGBAverage();
+                currentPictureUse.contrastDynamicExtensionRGBAverage();
                 return true;
             case R.id.contrastEqualHisto:
-                currentPicture.contrastHistogramEqualizationYuvRS(getApplicationContext());
+                currentPictureUse.contrastHistogramEqualizationYuvRS(getApplicationContext());
                 return true;
             case R.id.moyenneur:
                 int[][] matriceMoy = new int[3][3];
@@ -141,7 +144,7 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                         matriceMoy[i][j]=1;
                     }
                 }
-                Convolution blur3x3 = new Convolution(currentPicture, matriceMoy, 3, 3, false);
+                Convolution blur3x3 = new Convolution(currentPictureUse, matriceMoy, 3, 3, false);
                 blur3x3.compute();
                 return true;
 
@@ -156,7 +159,7 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                 matrice[2][0] = -1;
                 matrice[2][1] = 0;
                 matrice[2][2] = 1;
-                Convolution contourPrewitt = new Convolution(currentPicture, matrice, 3, 3,true);
+                Convolution contourPrewitt = new Convolution(currentPictureUse, matrice, 3, 3,true);
                 contourPrewitt.compute();
                 return true;
 
@@ -171,14 +174,14 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                 matrix[2][0] = -1;
                 matrix[2][1] = 0;
                 matrix[2][2] = 1;
-                Convolution contourSobel= new Convolution(currentPicture, matrix, 3, 3,true);
+                Convolution contourSobel= new Convolution(currentPictureUse, matrix, 3, 3,true);
                 contourSobel.compute();
                 return true;
             case R.id.Luminosity:
                 seekbarlum.setProgress(100);
                 seekbarlum.setVisibility(View.VISIBLE);
                 textLumi.setVisibility(View.VISIBLE);
-                copyCurrentPicture = new Picture(currentPicture);
+                copycurrentPictureUse = new Picture(currentPictureUse);
                 return true;
 
             case R.id.importFromGallery:
@@ -187,13 +190,12 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
 
             case R.id.saveImage:
                 Save saveFile = new Save();
-                saveFile.SaveImage(this,currentPicture.getBmp());
+                saveFile.SaveImage(this,currentPictureUse.getBmp());
                 return true;
 
         }
         return super.onOptionsItemSelected(item);
     }
-
 
     private void dispatchTakePictureIntent() {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
@@ -220,19 +222,11 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
 
     }
 
-    private void galleryAddPic() {
-        Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-        File f = new File(currentPhotoPath);
-        Uri contentUri = Uri.fromFile(f);
-        mediaScanIntent.setData(contentUri);
-        this.sendBroadcast(mediaScanIntent);
-    }
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data){
         super.onActivityResult(requestCode,resultCode,data);
         switch (requestCode){
-            case REQUEST_TAKE_PHOTO: {
+            case REQUEST_TAKE_PHOTO: { /* Dans le cas où l'on prend une photo avec la caméra */
                 if(resultCode == RESULT_OK){
                     File file = new File(currentPhotoPath);
                     Bitmap imageBitmap = null;
@@ -242,10 +236,9 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                         e.printStackTrace();
                     }
                     if(imageBitmap != null){
-                        originalPicture = new Picture(imageBitmap);
-                        currentPicture = new Picture(imageBitmap);
-                        img.setImageBitmap(imageBitmap);
-                        galleryAddPic();
+                        originalPictureUse = new Picture(imageBitmap);
+                        currentPictureUse = new Picture(imageBitmap);
+                        imageView.setImageBitmap(currentPictureUse.getBmp());
                     }
                 }
                 break;
@@ -256,23 +249,13 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                 }
             }
         }
-
-
-
-
-        /*super.onActivityResult(requestCode,resultCode,data);
-        if(requestCode == GALLERY_REQUEST){ //si la requête est l'accès à la galerie
-            if(resultCode == Activity.RESULT_OK){
-                onSelectFromGalleryResult(data);
-            }
-        }else if(requestCode == CAMERA_REQUEST){
-            if(resultCode == Activity.RESULT_OK){
-                onCaptureImageResult(data);
-            }
-
-        }*/
     }
 
+    /**
+     * Créé un fichier  pour sauvegarder l'image prise par
+     * @return
+     * @throws IOException
+     */
     private File createImageFile() throws IOException {
         // Create an image file name
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
@@ -285,7 +268,7 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
         );
 
         // Save a file: path for use with ACTION_VIEW intents
-        this.currentPhotoPath = image.getAbsolutePath();
+        currentPhotoPath = image.getAbsolutePath();
         return image;
     }
 
@@ -297,16 +280,16 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
 
 
     private void onSelectFromGalleryResult(Intent data){
-        Bitmap bmp = currentPicture.getBmp();
+        Bitmap bmp = currentPictureUse.getBmp();
         if(data != null){
             try{
                 bmp = MediaStore.Images.Media.getBitmap(getContentResolver(),data.getData());
             }catch (IOException e ){
                 Toast.makeText(this, "Failed to access to gallery", Toast.LENGTH_SHORT).show();
             }
-            currentPicture.setBmp(bmp);
-            img.setImageBitmap(currentPicture.getBmp());
-            originalPicture.setBmp(bmp);
+            currentPictureUse.setBmp(bmp);
+            imageView.setImageBitmap(currentPictureUse.getBmp());
+            originalPictureUse.setBmp(bmp);
 
         }
     }
@@ -314,10 +297,10 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
     private void onCaptureImageResult(Intent data){
         if(data != null){
             Bitmap bmp = (Bitmap) data.getExtras().get("data");
-            currentPicture.setBmp(bmp);
-            img.setImageBitmap(currentPicture.getBmp());
-            originalPicture.setBmp(bmp);
-            img.setImageBitmap(originalPicture.getBmp());
+            currentPictureUse.setBmp(bmp);
+            imageView.setImageBitmap(currentPictureUse.getBmp());
+            originalPictureUse.setBmp(bmp);
+            imageView.setImageBitmap(originalPictureUse.getBmp());
         }
     }
 
@@ -333,7 +316,7 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
 
     @Override
     public void onStopTrackingTouch(SeekBar seekBar) {
-        copyCurrentPicture.AdjustLuminosityRS(getApplicationContext(),seekBar.getProgress(),currentPicture);
+        copycurrentPictureUse.AdjustLuminosityRS(getApplicationContext(),seekBar.getProgress(),currentPictureUse);
     }
 
 }
