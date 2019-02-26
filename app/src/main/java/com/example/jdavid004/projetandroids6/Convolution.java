@@ -1,7 +1,11 @@
 package com.example.jdavid004.projetandroids6;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.support.v8.renderscript.Allocation;
+import android.support.v8.renderscript.RenderScript;
+import android.support.v8.renderscript.Element;
 
 /**
  * Created by bdarmet on 01/02/19.
@@ -9,13 +13,15 @@ import android.graphics.Color;
 
 public class Convolution {
 
-    int[][] matrix;
-    int m_width;
-    int m_height;
-    int factor;     //Somme des valeurs de la matrice
-    boolean secondApplyWithMatrixTranslation = false;   //Utiliser pour appliquer les 2 matrices h1 et h2 du cours avec une seule matrice
+    private Picture picture;
+    private int[][] matrix;
+    private int m_width;
+    private int m_height;
+    private int factor;     //Somme des valeurs de la matrice
+    private boolean secondApplyWithMatrixTranslation = false;   //Utiliser pour appliquer les 2 matrices h1 et h2 du cours avec une seule matrice
 
-    Convolution(int[][] mat, int width, int height, boolean secondApplyWithMatrixTranslation){
+    Convolution(Picture picture, int[][] mat, int width, int height, boolean secondApplyWithMatrixTranslation){
+        this.picture = picture;
         this.m_width = width;
         this.m_height = height;
         this.matrix = new int[width][height];
@@ -28,9 +34,12 @@ public class Convolution {
         this.secondApplyWithMatrixTranslation = secondApplyWithMatrixTranslation;
     }
 
-    void compute(Bitmap bmp){
-        int[] SrcPixels = new int[bmp.getHeight()*bmp.getWidth()];
-        bmp.getPixels(SrcPixels,0,bmp.getWidth(),0,0,bmp.getWidth(),bmp.getHeight());
+    void compute(){
+        Bitmap bmp = picture.getBmp();
+        int height = picture.getHeight();
+        int width = picture.getWidth();
+        int[] SrcPixels = new int[height*width];
+        bmp.getPixels(SrcPixels,0,width,0,0,width,height);  //obtenir à partir de picture (comme plus haut)
         int[] ResPixels = SrcPixels.clone();
 
         //Ces 6 variables ne servent que dans le cas d'un contour
@@ -38,13 +47,13 @@ public class Convolution {
         int maxModuleGradiantGreen = 0;
         int maxModuleGradiantBlue = 0;
 
-        int[] GradiantRed = new int[bmp.getHeight()*bmp.getWidth()];
-        int[] GradiantGreen = new int[bmp.getHeight()*bmp.getWidth()];
-        int[] GradiantBlue = new int[bmp.getHeight()*bmp.getWidth()];
+        int[] GradiantRed = new int[height*width];
+        int[] GradiantGreen = new int[height*width];
+        int[] GradiantBlue = new int[height*width];
 
-        for(int y = 0; y < bmp.getHeight()-this.m_height+1; y++){                   //Parcours de l'image comme dans le cours
-            for(int x = 0; x < bmp.getWidth()-this.m_width+1; x++){
-                int index_center = ((x + (this.m_width/2)) + (y + (this.m_height/2))*bmp.getWidth());   //Indice du pixel au centre de la matrice
+        for(int y = 0; y < height-this.m_height+1; y++){                   //Parcours de l'image comme dans le cours
+            for(int x = 0; x < width-this.m_width+1; x++){
+                int index_center = ((x + (this.m_width/2)) + (y + (this.m_height/2))*width);   //Indice du pixel au centre de la matrice
                 int sumRed = 0;
                 int sumGreen = 0;
                 int sumBlue = 0;
@@ -127,9 +136,9 @@ public class Convolution {
         }
 
         if(secondApplyWithMatrixTranslation){
-            for(int y = 0; y < bmp.getHeight()-this.m_height+1; y++) {                   //Parcours de l'image comme dans le cours
-                for (int x = 0; x < bmp.getWidth() - this.m_width + 1; x++) {
-                    int index_center = ((x + (this.m_width / 2)) + (y + (this.m_height / 2)) * bmp.getWidth());   //Indice du pixel au centre de la matrice
+            for(int y = 0; y < height - this.m_height+1; y++) {                   //Parcours de l'image comme dans le cours
+                for (int x = 0; x < width - this.m_width + 1; x++) {
+                    int index_center = ((x + (this.m_width / 2)) + (y + (this.m_height / 2)) * width);   //Indice du pixel au centre de la matrice
 
                     float newRed = (GradiantRed[index_center] / (float)maxModuleGradiantRed) * 255;          //normalisation par le max
                     float newGreen = (GradiantGreen[index_center] / (float)maxModuleGradiantGreen) * 255;
@@ -140,27 +149,78 @@ public class Convolution {
         }
 
         if(this.m_width == this.m_height  && this.m_height == 3){                           //Gestion des bords pour filtre 3x3
-            for(int y = 0; y < bmp.getHeight(); y++){
-                for(int x = 0; x < bmp.getWidth(); x++){
-                    if(y == 0 && x != 0 && x != bmp.getWidth()-1){                          //cas du bord haut sans le coin
+            for(int y = 0; y < height; y++){
+                for(int x = 0; x < width; x++){
+                    if(y == 0 && x != 0 && x != width-1){                          //cas du bord haut sans le coin
                         ResPixels[x+y*bmp.getWidth()] = ResPixels[x+(y+1)*bmp.getWidth()];
                     }
-                    if(y == bmp.getHeight()-1 && x != 0 && x != bmp.getWidth()-1){          //cas du bord bas sans le coin
-                        ResPixels[x+y*bmp.getWidth()] = ResPixels[x+(y-1)*bmp.getWidth()];
+                    if(y == height-1 && x != 0 && x != height-1){          //cas du bord bas sans le coin
+                        ResPixels[x+y*width] = ResPixels[x+(y-1)*width];
                     }
                     if(x == 0){                                                             //cas du bord gauche
-                        ResPixels[x+y*bmp.getWidth()] = ResPixels[(x+1)+y*bmp.getWidth()];
+                        ResPixels[x+y*width] = ResPixels[(x+1)+y*width];
                     }
-                    if(x == bmp.getWidth()-1){                                              //cas du bord droit
-                        ResPixels[x+y*bmp.getWidth()] = ResPixels[(x-1)+y*bmp.getWidth()];
+                    if(x == width-1){                                              //cas du bord droit
+                        ResPixels[x+y*width] = ResPixels[(x-1)+y*width];
                     }
 
                 }
             }
         }
 
-        bmp.setPixels(ResPixels,0,bmp.getWidth(),0,0,bmp.getWidth(),bmp.getHeight());   //Affectation des nouveaux pixels à l'image
+        bmp.setPixels(ResPixels,0,width,0,0,width,height);   //Affectation des nouveaux pixels à l'image
     }
 
+    void computeRS(Context context, Bitmap bmpOut){
+        Bitmap bmp = picture.getBmp();
+        int height = picture.getHeight();
+        int width = picture.getWidth();
+
+        RenderScript rs = RenderScript.create(context);
+
+        Allocation inAllocation = Allocation.createFromBitmap(rs, bmp, Allocation.MipmapControl.MIPMAP_NONE, Allocation.USAGE_SCRIPT);
+
+        Allocation outAllocation = Allocation.createTyped(rs, inAllocation.getType());
+
+        ScriptC_convolution convolutionScript = new ScriptC_convolution(rs);
+
+        int rowWidth = width;
+
+        int num_rows = height;
+        int[] row_indices = new int[num_rows];
+        for (int i = 0; i < num_rows; i++) {
+            row_indices[i] = i * rowWidth;
+        }
+        Allocation row_indices_alloc = Allocation.createSized(rs, Element.I32(rs), num_rows, Allocation.USAGE_SCRIPT);
+        row_indices_alloc.copyFrom(row_indices);
+
+        convolutionScript.bind_gInPixels(inAllocation);
+        convolutionScript.bind_gOutPixels(outAllocation);
+        convolutionScript.set_bmpWidth(width);
+        convolutionScript.set_bmpHeight(height);
+        convolutionScript.set_gIn(row_indices_alloc);
+        convolutionScript.set_gOut(row_indices_alloc);
+        convolutionScript.set_gScript(convolutionScript);
+
+        int matrix1d[] = new int[m_width*m_height];
+        int k = 0;
+        for(int i = 0; i < width; i++){
+            for(int j = 0;  j < height; j++){
+                matrix1d[k] = matrix[i][j];
+                k++;
+            }
+        }
+        convolutionScript.set_matrix(matrix1d);
+        convolutionScript.set_m_width(m_width);
+        convolutionScript.set_m_height(m_height);
+        convolutionScript.set_factor(factor);
+
+
+        convolutionScript.invoke_filter();
+        outAllocation.copyTo(bmpOut);
+
+        inAllocation.destroy(); outAllocation.destroy();
+        convolutionScript.destroy(); rs.destroy();
+    }
 }
 

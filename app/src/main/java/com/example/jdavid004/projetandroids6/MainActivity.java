@@ -4,8 +4,11 @@ package com.example.jdavid004.projetandroids6;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.net.Uri;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -13,19 +16,21 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.SeekBar;
-import android.util.Log;
-
 
 import android.widget.TextView;
 import android.widget.Toast;
 
 
+import java.io.File;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import yuku.ambilwarna.AmbilWarnaDialog;
+
+
+
 
 public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBarChangeListener{
     /* color picker variable */
@@ -39,8 +44,12 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
     private Picture copyCurrentPicture;
     private SeekBar seekbarlum;
     private TextView textLumi;
+    private String currentPhotoPath;
     private static final int GALLERY_REQUEST = 1314;
-    private static final int CAMERA_REQUEST = 1315;
+    static final int REQUEST_IMAGE_CAPTURE = 1;
+    static final int REQUEST_TAKE_PHOTO = 1;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -101,7 +110,7 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
         switch(item.getItemId()){
             // Cas où on clique sur la caméra pour accéder à l'appareil photo.
             case R.id.camera:
-                getImageFromCamera();
+                dispatchTakePictureIntent(); // Take a photo with a camera app
                 return true;
             // Cas où on clique sur la flèche pour annuler un effet.
             case R.id.reset:
@@ -125,6 +134,17 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
             case R.id.contrastEqualHisto:
                 currentPicture.contrastHistogramEqualizationYuvRS(getApplicationContext());
                 return true;
+            case R.id.moyenneur:
+                int[][] matriceMoy = new int[3][3];
+                for(int i = 0; i < 3; i++){
+                    for(int j = 0; j < 3; j++){
+                        matriceMoy[i][j]=1;
+                    }
+                }
+                Convolution blur3x3 = new Convolution(currentPicture, matriceMoy, 3, 3, false);
+                blur3x3.compute();
+                return true;
+
             case R.id.prewitt:
                 int[][] matrice = new int[3][3];
                 matrice[0][0] = -1;
@@ -136,8 +156,10 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                 matrice[2][0] = -1;
                 matrice[2][1] = 0;
                 matrice[2][2] = 1;
-                Convolution contourPrewitt = new Convolution(matrice, 3, 3,true);
-                contourPrewitt.compute(currentPicture.getBmp());
+                Convolution contourPrewitt = new Convolution(currentPicture, matrice, 3, 3,true);
+                contourPrewitt.compute();
+                return true;
+
             case R.id.sobel:
                 int[][] matrix = new int[3][3];
                 matrix[0][0] = -1;
@@ -149,9 +171,8 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                 matrix[2][0] = -1;
                 matrix[2][1] = 0;
                 matrix[2][2] = 1;
-                Convolution contourSobel= new Convolution(matrix, 3, 3,true);
-                contourSobel.compute(currentPicture.getBmp());
-                currentPicture.contrastHistogramEqualizationYuvRS(getApplicationContext());
+                Convolution contourSobel= new Convolution(currentPicture, matrix, 3, 3,true);
+                contourSobel.compute();
                 return true;
             case R.id.Luminosity:
                 seekbarlum.setProgress(100);
@@ -173,20 +194,72 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
         return super.onOptionsItemSelected(item);
     }
 
-    protected void getImageFromCamera(){
-        Intent cameraIntent = new Intent("android.media.action.IMAGE_CAPTURE");
-        startActivityForResult(cameraIntent,CAMERA_REQUEST);
+
+    private void dispatchTakePictureIntent() {
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        // Ensure that there's a camera activity to handle the intent
+        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+            // Create the File where the photo should go
+            File photoFile = null;
+            try {
+                photoFile = createImageFile();
+            } catch (IOException ex) {
+                ex.printStackTrace();// Error occurred while creating the File
+            }
+            // Continue only if the File was successfully created
+            if (photoFile != null) {
+                Uri photoURI = FileProvider.getUriForFile(this,
+                        "com.example.jdavid004.projetandroids6.fileprovider",
+                        photoFile);
+                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+                startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
+                Log.i("Photo", "Photo prise et sauvegardé dans un fichier");
+            }
+        }
+
+
     }
 
-    //crée l'intent et lance l'activité
-    protected void getImageFromGallery(){
-        Intent galleryIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-        startActivityForResult(galleryIntent,GALLERY_REQUEST);
+    private void galleryAddPic() {
+        Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+        File f = new File(currentPhotoPath);
+        Uri contentUri = Uri.fromFile(f);
+        mediaScanIntent.setData(contentUri);
+        this.sendBroadcast(mediaScanIntent);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data){
         super.onActivityResult(requestCode,resultCode,data);
+        switch (requestCode){
+            case REQUEST_TAKE_PHOTO: {
+                if(resultCode == RESULT_OK){
+                    File file = new File(currentPhotoPath);
+                    Bitmap imageBitmap = null;
+                    try {
+                        imageBitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(),Uri.fromFile(file));
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    if(imageBitmap != null){
+                        currentPicture = new Picture(imageBitmap);
+                        img.setImageBitmap(imageBitmap);
+                        galleryAddPic();
+                    }
+                }
+                break;
+            }
+            case(GALLERY_REQUEST): {
+                if(resultCode == Activity.RESULT_OK){
+                    onSelectFromGalleryResult(data);
+                }
+            }
+        }
+
+
+
+
+        /*super.onActivityResult(requestCode,resultCode,data);
         if(requestCode == GALLERY_REQUEST){ //si la requête est l'accès à la galerie
             if(resultCode == Activity.RESULT_OK){
                 onSelectFromGalleryResult(data);
@@ -196,8 +269,31 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                 onCaptureImageResult(data);
             }
 
-        }
+        }*/
     }
+
+    private File createImageFile() throws IOException {
+        // Create an image file name
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String imageFileName = "JPEG_" + timeStamp + "_";
+        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        File image = File.createTempFile(
+                imageFileName,  /* prefix */
+                ".jpg",         /* suffix */
+                storageDir      /* directory */
+        );
+
+        // Save a file: path for use with ACTION_VIEW intents
+        this.currentPhotoPath = image.getAbsolutePath();
+        return image;
+    }
+
+    //crée l'intent et lance l'activité
+    protected void getImageFromGallery(){
+        Intent galleryIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        startActivityForResult(galleryIntent,GALLERY_REQUEST);
+    }
+
 
     private void onSelectFromGalleryResult(Intent data){
         Bitmap bmp = currentPicture.getBmp();
@@ -209,6 +305,8 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
             }
             currentPicture.setBmp(bmp);
             img.setImageBitmap(currentPicture.getBmp());
+            originalPicture.setBmp(bmp);
+
         }
     }
 
