@@ -81,7 +81,6 @@ public class Camera {
         // Ensure that there's a camera activity to handle the intent
         if (takePictureIntent.resolveActivity(activity.getPackageManager()) != null) {
             // Create the File where the photo should go
-
             try {
                 Camera cam = new Camera(TheThis);
                 photoFile = cam.createImageFile();
