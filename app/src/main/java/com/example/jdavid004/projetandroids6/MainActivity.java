@@ -48,8 +48,6 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
     private static final int GALLERY_REQUEST = 1314;
     private static final int REQUEST_TAKE_PHOTO = 1;
 
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -112,7 +110,8 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
         switch(item.getItemId()){
             // Cas où on clique sur la caméra pour accéder à l'appareil photo.
             case R.id.camera:
-                dispatchTakePictureIntent(); // Take a photo with a camera app
+                Camera cam = new Camera(this);
+                currentPhotoPath = cam.dispatchTakePictureIntent(); // Take a photo with a camera app
                 return true;
             // Cas où on clique sur la flèche pour annuler un effet.
             case R.id.reset:
@@ -185,7 +184,8 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                 return true;
 
             case R.id.importFromGallery:
-                getImageFromGallery();
+                cam = new Camera(this);
+                cam.getImageFromGallery();
                 return true;
 
             case R.id.saveImage:
@@ -197,30 +197,7 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
         return super.onOptionsItemSelected(item);
     }
 
-    private void dispatchTakePictureIntent() {
-        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        // Ensure that there's a camera activity to handle the intent
-        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-            // Create the File where the photo should go
-            File photoFile = null;
-            try {
-                photoFile = createImageFile();
-            } catch (IOException ex) {
-                ex.printStackTrace();// Error occurred while creating the File
-            }
-            // Continue only if the File was successfully created
-            if (photoFile != null) {
-                Uri photoURI = FileProvider.getUriForFile(this,
-                        "com.example.jdavid004.projetandroids6.fileprovider",
-                        photoFile);
-                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
-                startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
-                Log.i("Photo", "Photo prise et sauvegardé dans un fichier");
-            }
-        }
 
-
-    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data){
@@ -245,64 +222,14 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
             }
             case(GALLERY_REQUEST): {
                 if(resultCode == Activity.RESULT_OK){
-                    onSelectFromGalleryResult(data);
+                    Camera cam = new Camera(this);
+                    cam.onSelectFromGalleryResult(data, currentPictureUse, originalPictureUse, imageView);
                 }
             }
         }
     }
 
-    /**
-     * Créé un fichier  pour sauvegarder l'image prise par
-     * @return
-     * @throws IOException
-     */
-    private File createImageFile() throws IOException {
-        // Create an image file name
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        String imageFileName = "JPEG_" + timeStamp + "_";
-        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-        File image = File.createTempFile(
-                imageFileName,  /* prefix */
-                ".jpg",         /* suffix */
-                storageDir      /* directory */
-        );
 
-        // Save a file: path for use with ACTION_VIEW intents
-        currentPhotoPath = image.getAbsolutePath();
-        return image;
-    }
-
-    //crée l'intent et lance l'activité
-    protected void getImageFromGallery(){
-        Intent galleryIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-        startActivityForResult(galleryIntent,GALLERY_REQUEST);
-    }
-
-
-    private void onSelectFromGalleryResult(Intent data){
-        Bitmap bmp = currentPictureUse.getBmp();
-        if(data != null){
-            try{
-                bmp = MediaStore.Images.Media.getBitmap(getContentResolver(),data.getData());
-            }catch (IOException e ){
-                Toast.makeText(this, "Failed to access to gallery", Toast.LENGTH_SHORT).show();
-            }
-            currentPictureUse.setBmp(bmp);
-            imageView.setImageBitmap(currentPictureUse.getBmp());
-            originalPictureUse.setBmp(bmp);
-
-        }
-    }
-
-    private void onCaptureImageResult(Intent data){
-        if(data != null){
-            Bitmap bmp = (Bitmap) data.getExtras().get("data");
-            currentPictureUse.setBmp(bmp);
-            imageView.setImageBitmap(currentPictureUse.getBmp());
-            originalPictureUse.setBmp(bmp);
-            imageView.setImageBitmap(originalPictureUse.getBmp());
-        }
-    }
 
     @Override
     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
