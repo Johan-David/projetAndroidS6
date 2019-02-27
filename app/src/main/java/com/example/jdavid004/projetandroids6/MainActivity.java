@@ -133,44 +133,94 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                 return true;
 
             case R.id.moyenneur:
-                int[][] matriceMoy = new int[3][3];
-                for(int i = 0; i < 3; i++){
-                    for(int j = 0; j < 3; j++){
-                        matriceMoy[i][j]=1;
+                int mWidthMoy = 3;
+                int mHeightMoy = mWidthMoy;
+                int[][] matrixMoy = new int[mWidthMoy][mHeightMoy];
+                for(int i = 0; i < mWidthMoy; i++){
+                    for(int j = 0; j < mHeightMoy; j++){
+                        matrixMoy[i][j]=1;
                     }
                 }
-                Convolution blur3x3 = new Convolution(currentPicture, matriceMoy, 3, 3, false);
-                blur3x3.compute();
+                Convolution blur = new Convolution(currentPicture, matrixMoy, mWidthMoy, mHeightMoy, false, true);
+                //blur.compute();
+                //blur.computeRS(getApplicationContext());
+                blur.computeIntrinsicConvolve(getApplicationContext());
+                return true;
+
+            case R.id.gaussien:
+                int mWidthGauss = 3;
+                int mHeightGauss = mWidthGauss;
+                int[][] matrixGauss = new int[mWidthGauss][mHeightGauss];
+                matrixGauss[0][0] = 1;
+                matrixGauss[0][1] = 2;
+                matrixGauss[0][2] = 1;
+                matrixGauss[1][0] = 2;
+                matrixGauss[1][1] = 4;
+                matrixGauss[1][2] = 2;
+                matrixGauss[2][0] = 1;
+                matrixGauss[2][1] = 2;
+                matrixGauss[2][2] = 1;
+                Convolution gaussien = new Convolution(currentPicture, matrixGauss, mWidthGauss, mHeightGauss, false, true);
+                //gaussien.compute();
+                //gaussien.computeRS(getApplicationContext());
+                gaussien.computeIntrinsicGaussianBlur(getApplicationContext(), 3);
                 return true;
 
             case R.id.prewitt:
-                int[][] matrice = new int[3][3];
-                matrice[0][0] = -1;
-                matrice[0][1] = 0;
-                matrice[0][2] = 1;
-                matrice[1][0] = -1;
-                matrice[1][1] = 0;
-                matrice[1][2] = 1;
-                matrice[2][0] = -1;
-                matrice[2][1] = 0;
-                matrice[2][2] = 1;
-                Convolution contourPrewitt = new Convolution(currentPicture, matrice, 3, 3,true);
-                contourPrewitt.compute();
+                int mWidthPrewitt = 3;
+                int mHeightPrewitt = mWidthPrewitt;
+                int[][] matrixPrewitt = new int[mWidthPrewitt][mHeightPrewitt];
+                matrixPrewitt[0][0] = -1;
+                matrixPrewitt[0][1] = 0;
+                matrixPrewitt[0][2] = 1;
+                matrixPrewitt[1][0] = -1;
+                matrixPrewitt[1][1] = 0;
+                matrixPrewitt[1][2] = 1;
+                matrixPrewitt[2][0] = -1;
+                matrixPrewitt[2][1] = 0;
+                matrixPrewitt[2][2] = 1;
+                Convolution contourPrewitt = new Convolution(currentPicture, matrixPrewitt, mWidthPrewitt, mHeightPrewitt,true, false);
+                //contourPrewitt.compute();
+                //contourPrewitt.computeRS(getApplicationContext());
+                contourPrewitt.computeIntrinsicConvolve(getApplicationContext());
                 return true;
 
             case R.id.sobel:
-                int[][] matrix = new int[3][3];
-                matrix[0][0] = -1;
-                matrix[0][1] = 0;
-                matrix[0][2] = 1;
-                matrix[1][0] = -2;
-                matrix[1][1] = 0;
-                matrix[1][2] = 2;
-                matrix[2][0] = -1;
-                matrix[2][1] = 0;
-                matrix[2][2] = 1;
-                Convolution contourSobel= new Convolution(currentPicture, matrix, 3, 3,true);
-                contourSobel.compute();
+                int mWidthSobel = 3;
+                int mHeightSobel = mWidthSobel;
+                int[][] matrixSobel = new int[mWidthSobel][mHeightSobel];
+                matrixSobel[0][0] = -1;
+                matrixSobel[0][1] = 0;
+                matrixSobel[0][2] = 1;
+                matrixSobel[1][0] = -2;
+                matrixSobel[1][1] = 0;
+                matrixSobel[1][2] = 2;
+                matrixSobel[2][0] = -1;
+                matrixSobel[2][1] = 0;
+                matrixSobel[2][2] = 1;
+                Convolution contourSobel= new Convolution(currentPicture, matrixSobel, mWidthSobel, mHeightSobel,true, false);
+                //contourSobel.compute();
+                //contourSobel.computeRS(getApplicationContext());
+                contourSobel.computeIntrinsicConvolve(getApplicationContext());
+                return true;
+
+            case R.id.laplacien:
+                int mWidthLaplacien = 3;
+                int mHeightLaplacien = mWidthLaplacien;
+                int [][] matrixLaplacien = new int [mWidthLaplacien][mHeightLaplacien];
+                matrixLaplacien[0][0] = 0;
+                matrixLaplacien[0][1] = 1;
+                matrixLaplacien[0][2] = 0;
+                matrixLaplacien[1][0] = 1;
+                matrixLaplacien[1][1] = -4;
+                matrixLaplacien[1][2] = 1;
+                matrixLaplacien[2][0] = 0;
+                matrixLaplacien[2][1] = 1;
+                matrixLaplacien[2][2] = 0;
+                Convolution contourLaplacien = new Convolution(currentPicture, matrixLaplacien, mWidthLaplacien, mHeightLaplacien, false, false);
+                //contourLaplacien.compute();
+                //contourLaplacien.computeRS(getApplicationContext());
+                contourLaplacien.computeIntrinsicConvolve(getApplicationContext());
                 return true;
 
             case R.id.Luminosity:
