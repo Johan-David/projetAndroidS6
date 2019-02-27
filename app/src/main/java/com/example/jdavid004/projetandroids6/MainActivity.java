@@ -195,6 +195,7 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                 return true;
 
             case R.id.saveImage:
+                //check if the permission to write in the storage is already granted
                 if(ContextCompat.checkSelfPermission(MainActivity.this,Manifest.permission.WRITE_EXTERNAL_STORAGE)!= PackageManager.PERMISSION_GRANTED){
                     requestStoragePermission();
                 }
@@ -300,7 +301,6 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
     public void onSelectFromGalleryResult(Intent data){
         Bitmap bmp = currentPictureUse.getBmp();
         if(data != null){
-            Log.i("t", "PASSE LE TEST IF");
             try{
                 bmp = MediaStore.Images.Media.getBitmap(getContentResolver(),data.getData());
             }catch (IOException e ){
@@ -312,18 +312,24 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
         }
     }
 
+    /**
+     * requestStoragePermission : if the permission to access to the gallery is not already granted, asks permission
+     */
     public void requestStoragePermission(){
+        //if the permission has already been asked and denied, create a dialog to explain why we need the permission
         if(ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)){
-            new AlertDialog.Builder(this)
+            new AlertDialog.Builder(this)  //creates a dialog with the user
                     .setTitle("Permission needed")
-                    .setMessage("Permission to access to storage is needed to save the image")
+                    .setMessage("Permission to access to the storage is needed to save the image")
                     .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        //if the user clicks on "OK", asks permission again
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             ActivityCompat.requestPermissions(MainActivity.this,new String[] {Manifest.permission.WRITE_EXTERNAL_STORAGE}, STORAGE_PERMISSION_CODE);
                         }
                     })
                     .setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
+                        //if the user clicks on "CANCEL", shut the dialog
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             dialog.dismiss();
@@ -331,14 +337,21 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                     })
                     .create().show();
         }else{
+            //asks permission to write in the storage
             ActivityCompat.requestPermissions(this,new String[] {Manifest.permission.WRITE_EXTERNAL_STORAGE}, STORAGE_PERMISSION_CODE);
         }
     }
 
+    /**
+     * onRequestPermissionsResult : callback for the result from requesting permissions
+     * @param requestCode : code of the permission
+     * @param permissions : requested permissions
+     * @param grantResults : grant results for the corresponding permissions
+     */
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if(requestCode == STORAGE_PERMISSION_CODE){
-            if(grantResults.length >0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+        if(requestCode == STORAGE_PERMISSION_CODE){ //if the permission requested is to access to the storage
+            if(grantResults.length >0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){ //if the permission is granted
                 Toast.makeText(this, "Permission granted",Toast.LENGTH_SHORT).show();
             }else{
                 Toast.makeText(this,"Permission denied",Toast.LENGTH_SHORT).show();
