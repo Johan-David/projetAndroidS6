@@ -4,6 +4,7 @@ package com.example.jdavid004.projetandroids6;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -110,14 +111,12 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
         switch(item.getItemId()){
             // Cas où on clique sur la caméra pour accéder à l'appareil photo.
             case R.id.camera:
-                Camera cam = new Camera(this);
-                currentPhotoPath = cam.dispatchTakePictureIntent(); // Take a photo with a camera app
+                dispatchTakePictureIntent(); // Take a photo with a camera app
                 return true;
             // Cas où on clique sur la flèche pour annuler un effet.
             case R.id.reset:
                 currentPictureUse = new Picture(originalPictureUse);
                 imageView.setImageBitmap(currentPictureUse.getBmp()); // On oublie pas de réafficher l'image
-
                 return true;
             case R.id.toGrey:
                 currentPictureUse.toGreyRS(getApplicationContext());
@@ -184,8 +183,7 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                 return true;
 
             case R.id.importFromGallery:
-                cam = new Camera(this);
-                cam.getImageFromGallery();
+                getImageFromGallery();
                 return true;
 
             case R.id.saveImage:
@@ -222,14 +220,86 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
             }
             case(GALLERY_REQUEST): {
                 if(resultCode == Activity.RESULT_OK){
-                    Camera cam = new Camera(this);
-                    cam.onSelectFromGalleryResult(data, currentPictureUse, originalPictureUse, imageView);
+                    onSelectFromGalleryResult(data);
                 }
             }
         }
     }
 
+    public File createImageFile() throws IOException {
+        // Create an image file name
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String imageFileName = "JPEG_" + timeStamp + "_";
+        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        File image = File.createTempFile(
+                imageFileName,  /* prefix */
+                ".jpg",         /* suffix */
+                storageDir      /* directory */
+        );
 
+        // Save a file: path for use with ACTION_VIEW intents
+        return image;
+    }
+
+    /**
+     * take a photo and save it
+     * @return the name of photo created
+     */
+
+    public void dispatchTakePictureIntent() {
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        File photoFile = null;
+        // Ensure that there's a camera activity to handle the intent
+        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+            // Create the File where the photo should go
+            try {
+                photoFile = createImageFile();
+                currentPhotoPath = photoFile.getAbsolutePath();
+            } catch (IOException ex) {
+                ex.printStackTrace();// Error occurred while creating the File
+            }
+            // Continue only if the File was successfully created
+            if (photoFile != null) {
+                Uri photoURI = FileProvider.getUriForFile(this,
+                        "com.example.jdavid004.projetandroids6.fileprovider",
+                        photoFile);
+                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+                startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
+                Log.i("Photo", "Photo prise et sauvegardé dans un fichier");
+            }
+        }
+
+
+    }
+
+    /**
+     * create the intent and launch the activity
+     */
+
+    protected void getImageFromGallery(){
+        Intent galleryIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        startActivityForResult(galleryIntent,GALLERY_REQUEST);
+    }
+
+    /**
+     * load an image from the gallery
+     * @param data
+     */
+
+    public void onSelectFromGalleryResult(Intent data){
+        Bitmap bmp = currentPictureUse.getBmp();
+        if(data != null){
+            Log.i("t", "PASSE LE TEST IF");
+            try{
+                bmp = MediaStore.Images.Media.getBitmap(getContentResolver(),data.getData());
+            }catch (IOException e ){
+                Toast.makeText(this, "Failed to access to gallery", Toast.LENGTH_SHORT).show();
+            }
+            currentPictureUse = new Picture(bmp);
+            originalPictureUse = new Picture(bmp);
+            imageView.setImageBitmap(currentPictureUse.getBmp());
+        }
+    }
 
     @Override
     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
