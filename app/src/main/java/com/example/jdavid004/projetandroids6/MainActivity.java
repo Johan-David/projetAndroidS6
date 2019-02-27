@@ -24,7 +24,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.SeekBar;
-
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -33,6 +32,7 @@ import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+
 
 import yuku.ambilwarna.AmbilWarnaDialog;
 
@@ -127,7 +127,7 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                 imageView.setImageBitmap(currentPictureUse.getBmp()); // On oublie pas de réafficher l'image
                 return true;
             case R.id.toGrey:
-                currentPictureUse.toGreyRS(getApplicationContext());
+                currentPictureUse.toGrey();
                 return true;
             case R.id.colorize:
                 colorPickerOption = 1;
@@ -138,7 +138,7 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                 openColorPicker();
                 return true;
             case R.id.contrastDynamicExten:
-                currentPictureUse.contrastDynamicExtensionRGBAverage();
+                currentPictureUse.contrasDynamicExtensionRS(getApplicationContext());
                 return true;
             case R.id.contrastEqualHisto:
                 currentPictureUse.contrastHistogramEqualizationYuvRS(getApplicationContext());

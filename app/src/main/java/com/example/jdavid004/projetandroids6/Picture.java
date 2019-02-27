@@ -7,6 +7,9 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.support.v8.renderscript.Allocation;
 import android.support.v8.renderscript.RenderScript;
+import android.util.Log;
+
+import com.android.rssample.ScriptC_dynExtension;
 
 import java.util.Random;
 
@@ -329,6 +332,61 @@ public class Picture  {
         }
 
         bmp.setPixels(pixels,0,bmp.getWidth(),0,0,bmp.getWidth(),bmp.getHeight());
+    }
+
+    void contrasDynamicExtensionRS(Context context){
+        //Initialisation of the composant to compute the min and max
+        int[] pixels = new int[bmp.getHeight()*bmp.getWidth()];
+        bmp.getPixels(pixels,0,bmp.getWidth(),0,0,bmp.getWidth(),bmp.getHeight());
+        int min = 255;
+        int max = 0;
+        float LUT[] = new float[256];
+
+        //Create new bitmap
+        Bitmap res = bmp.copy(bmp.getConfig(), true);
+
+        //Create renderscript
+        RenderScript rs = RenderScript.create(context);
+
+        //Create allocation from Bitmap
+        Allocation allocationA = Allocation.createFromBitmap(rs, res);
+
+        //Create allocation with same type
+        Allocation allocationB = Allocation.createTyped(rs, allocationA.getType());
+
+
+        //Calcul of min and max not in Renderscript.
+        for(int i = 0; i < pixels.length; i++){
+            int average = (Color.red(pixels[i])+Color.green(pixels[i])+Color.blue(pixels[i])) / 3;
+            if(average < min){
+                min = average;
+            }
+            if(average > max){
+                max = average;
+            }
+        }
+        Log.i("java", "value of min " + min);
+        Log.i("java", "value of max " + max);
+
+
+        //Create script from rs file.
+        ScriptC_dynExtension test= new ScriptC_dynExtension(rs);
+
+        //Call the rs method to compute the remap array. It creates the LUT
+        test.set_minValue(min);
+        test.set_maxValue(max);
+        test.invoke_changeLUT();
+
+        test.forEach_transformation(allocationB, allocationA);
+        //Copy script result into bitmap
+        allocationA.copyTo(bmp);
+
+        //Destroy everything to free memory
+        allocationA.destroy();
+        allocationB.destroy();
+        test.destroy();
+        rs.destroy();
+
     }
 
 
