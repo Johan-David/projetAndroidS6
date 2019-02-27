@@ -2,16 +2,23 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <item android:id="@+id/camera"
+    <item
+        android:id="@+id/camera"
         android:icon="@drawable/ic_camera"
         android:title="camera"
-        app:showAsAction="ifRoom" ></item>
+        app:showAsAction="always"></item>
 
-    <item android:id="@+id/reset"
+    <item
+        android:id="@+id/importFromGallery"
+        android:icon="@drawable/ic_import_gallery"
+        android:title="gallery"
+        app:showAsAction="always"></item>
+
+    <item
+        android:id="@+id/reset"
         android:icon="@drawable/ic_reset"
         android:title="reset"
-        app:showAsAction="ifRoom" ></item>
-
+        app:showAsAction="always"></item>
 
     <item android:id="@+id/colorMenu"
         android:icon="@drawable/ic_menu"
@@ -78,29 +85,13 @@
         android:id="@+id/Luminosity"
         android:title="Luminosity" />
 
-    <item android:id="@+id/saveMenu"
+    <item android:id="@+id/saveImage"
         android:icon="@drawable/ic_menu"
         android:title="Save"
         app:showAsAction="never" >
 
-        <menu>
-            <item android:id="@+id/saveImage"
-                android:title="saveImage"
-                app:showAsAction="never" ></item>
-        </menu>
     </item>
 
-    <item android:id="@+id/importPicture"
-        android:icon="@drawable/ic_menu"
-        android:title="Import"
-        app:showAsAction="never" >
-
-        <menu>
-            <item android:id="@+id/importFromGallery"
-                android:title="importImageFromGallery"
-                app:showAsAction="never" ></item>
-        </menu>
-    </item>
 
 
 </menu>
