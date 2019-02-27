@@ -130,7 +130,7 @@ public class Camera {
             }
             currentPicture.setBmp(bmp);
             img.setImageBitmap(currentPicture.getBmp());
-            originalPicture.setBmp(bmp);
+            originalPicture.setBmp(currentPicture.getBmp());
 
         }
     }

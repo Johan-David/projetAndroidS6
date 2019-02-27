@@ -41,6 +41,7 @@ import android.widget.ImageView;
  * user experience and a very natural feel when zooming and translating. It also supports
  * automatic resetting, and allows for exterior bounds restriction to keep the image within
  * visible window.
+ * @auth
  */
 public class ZoomageView extends AppCompatImageView implements OnScaleGestureListener {
 
