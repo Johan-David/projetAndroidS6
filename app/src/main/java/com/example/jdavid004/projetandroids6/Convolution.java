@@ -239,6 +239,11 @@ public class Convolution {
     }
 
     void computeIntrinsicConvolve(Context context){
+        if(m_width != 3){
+            if(m_width != 5){
+                return;
+            }
+        }
         Bitmap bmp = picture.getBmp();
 
         RenderScript rs = RenderScript.create(context);
