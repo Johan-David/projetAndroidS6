@@ -3,9 +3,14 @@ package com.example.jdavid004.projetandroids6;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.renderscript.Script;
 import android.support.v8.renderscript.Allocation;
 import android.support.v8.renderscript.RenderScript;
 import android.support.v8.renderscript.Element;
+import android.support.v8.renderscript.ScriptIntrinsicBlur;
+import android.support.v8.renderscript.ScriptIntrinsicConvolve3x3;
+import android.support.v8.renderscript.ScriptIntrinsicConvolve5x5;
+
 
 /**
  * Created by bdarmet on 01/02/19.
@@ -19,8 +24,9 @@ public class Convolution {
     private int m_height;
     private int factor;     //Somme des valeurs de la matrice
     private boolean secondApplyWithMatrixTranslation = false;   //Utiliser pour appliquer les 2 matrices h1 et h2 du cours avec une seule matrice
+    private boolean normalize;
 
-    Convolution(Picture picture, int[][] mat, int width, int height, boolean secondApplyWithMatrixTranslation){
+    Convolution(Picture picture, int[][] mat, int width, int height, boolean secondApplyWithMatrixTranslation, boolean normalize){
         this.picture = picture;
         this.m_width = width;
         this.m_height = height;
@@ -32,6 +38,8 @@ public class Convolution {
             }
         }
         this.secondApplyWithMatrixTranslation = secondApplyWithMatrixTranslation;
+        this.normalize = normalize;
+        if(!normalize) factor = 1;
     }
 
     void compute(){
@@ -171,56 +179,119 @@ public class Convolution {
         bmp.setPixels(ResPixels,0,width,0,0,width,height);   //Affectation des nouveaux pixels à l'image
     }
 
-    void computeRS(Context context, Bitmap bmpOut){
+
+    void computeRS(Context context){
         Bitmap bmp = picture.getBmp();
-        int height = picture.getHeight();
-        int width = picture.getWidth();
 
         RenderScript rs = RenderScript.create(context);
 
-        Allocation inAllocation = Allocation.createFromBitmap(rs, bmp, Allocation.MipmapControl.MIPMAP_NONE, Allocation.USAGE_SCRIPT);
+        Allocation inAllocation = Allocation.createFromBitmap(rs, bmp);
 
         Allocation outAllocation = Allocation.createTyped(rs, inAllocation.getType());
 
         ScriptC_convolution convolutionScript = new ScriptC_convolution(rs);
 
-        int rowWidth = width;
-
-        int num_rows = height;
-        int[] row_indices = new int[num_rows];
-        for (int i = 0; i < num_rows; i++) {
-            row_indices[i] = i * rowWidth;
-        }
-        Allocation row_indices_alloc = Allocation.createSized(rs, Element.I32(rs), num_rows, Allocation.USAGE_SCRIPT);
-        row_indices_alloc.copyFrom(row_indices);
-
-        convolutionScript.bind_gInPixels(inAllocation);
-        convolutionScript.bind_gOutPixels(outAllocation);
-        convolutionScript.set_bmpWidth(width);
-        convolutionScript.set_bmpHeight(height);
-        convolutionScript.set_gIn(row_indices_alloc);
-        convolutionScript.set_gOut(row_indices_alloc);
-        convolutionScript.set_gScript(convolutionScript);
 
         int matrix1d[] = new int[m_width*m_height];
         int k = 0;
-        for(int i = 0; i < width; i++){
-            for(int j = 0;  j < height; j++){
-                matrix1d[k] = matrix[i][j];
+        for(int i = 0; i < m_width; i++){
+            for(int j = 0;  j < m_height; j++){
+                matrix1d[k] = matrix[i][j];     //On aplatit la matrice
                 k++;
             }
         }
-        convolutionScript.set_matrix(matrix1d);
-        convolutionScript.set_m_width(m_width);
-        convolutionScript.set_m_height(m_height);
-        convolutionScript.set_factor(factor);
+        convolutionScript.set_ksize(m_width);
+        Allocation mat = Allocation.createSized(rs, Element.I32(rs),matrix1d.length);
+        mat.copyFrom(matrix1d);
+        convolutionScript.bind_kmatrix(mat);
+        convolutionScript.set_kdiv(factor);
+        convolutionScript.set_normal(true);
+        convolutionScript.set_gIn(inAllocation);
 
+        convolutionScript.invoke_setup();
+        convolutionScript.forEach_root(inAllocation,outAllocation);
 
-        convolutionScript.invoke_filter();
-        outAllocation.copyTo(bmpOut);
+        outAllocation.copyTo(bmp);
 
-        inAllocation.destroy(); outAllocation.destroy();
+        inAllocation.destroy(); outAllocation.destroy(); mat.destroy();
         convolutionScript.destroy(); rs.destroy();
+    }
+
+    void computeIntrinsicGaussianBlur(Context context, float radius){
+        Bitmap bmp = picture.getBmp();
+
+        RenderScript rs = RenderScript.create(context);
+
+        ScriptIntrinsicBlur blurScript = ScriptIntrinsicBlur.create(rs, Element.U8_4(rs));
+
+        Allocation inAllocation = Allocation.createFromBitmap(rs, bmp);
+        Allocation outAllocation = Allocation.createTyped(rs, inAllocation.getType());
+
+        blurScript.setRadius(radius);
+
+        blurScript.setInput(inAllocation);
+        blurScript.forEach(outAllocation);
+
+        outAllocation.copyTo(bmp);
+
+        blurScript.destroy();
+        inAllocation.destroy(); outAllocation.destroy(); rs.destroy();
+    }
+
+    void computeIntrinsicConvolve(Context context){
+        Bitmap bmp = picture.getBmp();
+
+        RenderScript rs = RenderScript.create(context);
+
+        Allocation inAllocation = Allocation.createFromBitmap(rs, bmp);
+        Allocation outAllocation = Allocation.createTyped(rs, inAllocation.getType());
+
+        if(m_width == 3){
+            final ScriptIntrinsicConvolve3x3 convolution3x3Script = ScriptIntrinsicConvolve3x3.create(rs, Element.U8_4(rs));
+
+            convolution3x3Script.setInput(inAllocation);
+            convolution3x3Script.setCoefficients(new float[]
+                    {
+                            (float)matrix[0][0]/factor, (float)matrix[0][1]/factor, (float)matrix[0][2]/factor,
+                            (float)matrix[1][0]/factor, (float)matrix[1][1]/factor, (float)matrix[1][2]/factor,
+                            (float)matrix[2][0]/factor, (float)matrix[2][1]/factor, (float)matrix[2][2]/factor
+                    });
+
+            convolution3x3Script.forEach(outAllocation);
+
+            if(secondApplyWithMatrixTranslation){
+                convolution3x3Script.setCoefficients(new float[]
+                        {
+                                (float)matrix[0][0]/factor, (float)matrix[1][0]/factor, (float)matrix[2][0]/factor,
+                                (float)matrix[0][1]/factor, (float)matrix[1][1]/factor, (float)matrix[2][1]/factor,
+                                (float)matrix[0][2]/factor, (float)matrix[1][2]/factor, (float)matrix[2][2]/factor
+                        });
+
+                convolution3x3Script.forEach(outAllocation);
+            }
+
+            convolution3x3Script.destroy();
+        }else{
+            final ScriptIntrinsicConvolve5x5 convolution5x5Script = ScriptIntrinsicConvolve5x5.create(rs, Element.U8_4(rs));
+
+            convolution5x5Script.setInput(inAllocation);
+            convolution5x5Script.setCoefficients(new float[]
+                    {
+                            (float)matrix[0][0]/factor,(float)matrix[0][1]/factor,(float)matrix[0][2]/factor,(float)matrix[0][3]/factor,(float)matrix[0][4]/factor,
+                            (float)matrix[1][0]/factor,(float)matrix[1][1]/factor,(float)matrix[1][2]/factor,(float)matrix[1][3]/factor,(float)matrix[1][4]/factor,
+                            (float)matrix[2][0]/factor,(float)matrix[2][1]/factor,(float)matrix[2][2]/factor,(float)matrix[2][3]/factor,(float)matrix[2][4]/factor,
+                            (float)matrix[3][0]/factor,(float)matrix[3][1]/factor,(float)matrix[3][2]/factor,(float)matrix[3][3]/factor,(float)matrix[3][4]/factor,
+                            (float)matrix[4][0]/factor,(float)matrix[4][1]/factor,(float)matrix[4][2]/factor,(float)matrix[4][3]/factor,(float)matrix[4][4]/factor
+                    });
+
+            convolution5x5Script.forEach(outAllocation);
+
+            convolution5x5Script.destroy();
+        }
+
+        outAllocation.copyTo(bmp);
+
+        inAllocation.destroy(); outAllocation.destroy(); rs.destroy();
     }
 }
 

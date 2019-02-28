@@ -79,6 +79,9 @@
             <item
                 android:id="@+id/sobel"
                 android:title="Sobel" />
+            <item
+                android:id="@+id/laplacien"
+                android:title="Laplacien" />
         </menu>
     </item>
     <item
