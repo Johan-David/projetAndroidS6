@@ -421,7 +421,8 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
 
     @Override
     public void onStopTrackingTouch(SeekBar seekBar) {
-        copycurrentPictureUse.AdjustLuminosityRS(getApplicationContext(),seekBar.getProgress(),currentPictureUse);
+        //currentPictureUse.AdjustLuminosity(seekBar.getProgress(),copycurrentPictureUse);
+        currentPictureUse.AdjustLuminosityRS(getApplicationContext(),seekBar.getProgress(),copycurrentPictureUse);
     }
 
 }

@@ -526,11 +526,33 @@ public class Picture  {
         rs.destroy();
     }
 
+    void AdjustLuminosity(int pourcent, Picture picture){
+        if(pourcent==100){
+            return;
+        }
+        int[] pixels = new int[bmp.getHeight()*bmp.getWidth()];
+        picture.getBmp().getPixels(pixels,0,bmp.getWidth(),0,0,bmp.getWidth(),bmp.getHeight());
+        float[] hsv = new float[3];
+        float luminosity = pourcent/100.f;
+
+        for(int i = 0; i < pixels.length; i++) {
+            Color.RGBToHSV(Color.red(pixels[i]), Color.green(pixels[i]), Color.blue(pixels[i]), hsv);
+            float newValue = hsv[2]*luminosity;
+            if(newValue > 1){
+                hsv[2] = 1;
+            }else{
+                hsv[2] = newValue;
+            }
+            pixels[i] = Color.HSVToColor(hsv);
+        }
+        bmp.setPixels(pixels,0,bmp.getWidth(),0,0,bmp.getWidth(),bmp.getHeight());
+    }
+
     void AdjustLuminosityRS(Context context, int pourcent, Picture picture){
         if(pourcent != 100){
             RenderScript rs = RenderScript.create(context);
 
-            Allocation input = Allocation.createFromBitmap(rs,bmp);
+            Allocation input = Allocation.createFromBitmap(rs,picture.getBmp());
             Allocation output = Allocation.createTyped(rs,input.getType());
 
             ScriptC_AdjustLuminosityHSV AdjustLuminosityHSVScript = new ScriptC_AdjustLuminosityHSV(rs);
@@ -539,7 +561,7 @@ public class Picture  {
 
             AdjustLuminosityHSVScript.forEach_AdjustLuminosityHSV(input,output);
 
-            output.copyTo(picture.getBmp());
+            output.copyTo(bmp);
 
             input.destroy(); output.destroy();
             AdjustLuminosityHSVScript.destroy(); rs.destroy();
