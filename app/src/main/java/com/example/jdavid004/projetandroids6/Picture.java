@@ -100,16 +100,17 @@ public class Picture  {
         greyScript.destroy(); rs.destroy();
     }
 
-    void colorize(){
+    void colorize(int color){
         int[] pixels = new int[bmp.getHeight()*bmp.getWidth()];
         bmp.getPixels(pixels,0,bmp.getWidth(),0,0,bmp.getWidth(),bmp.getHeight());
         float[] hsv = new float[3];
-        Random Aleatoire = new Random();
-        int rand = Aleatoire.nextInt(360);
+        float[] hsvColor = new float[3];
+        Color.RGBToHSV(Color.red(color),Color.green(color),Color.blue(color),hsvColor);
+
 
         for(int i = 0; i < pixels.length; i++){
             Color.RGBToHSV(Color.red(pixels[i]),Color.green(pixels[i]),Color.blue(pixels[i]),hsv);
-            hsv[0] = rand;
+            hsv[0] = hsvColor[0];
             pixels[i] = Color.HSVToColor(hsv);
         }
         bmp.setPixels(pixels,0,bmp.getWidth(),0,0,bmp.getWidth(),bmp.getHeight());
@@ -334,7 +335,7 @@ public class Picture  {
         bmp.setPixels(pixels,0,bmp.getWidth(),0,0,bmp.getWidth(),bmp.getHeight());
     }
 
-    void contrasDynamicExtensionRS(Context context){
+    void contrastDynamicExtensionRS(Context context){
         //Initialisation of the composant to compute the min and max
         int[] pixels = new int[bmp.getHeight()*bmp.getWidth()];
         bmp.getPixels(pixels,0,bmp.getWidth(),0,0,bmp.getWidth(),bmp.getHeight());

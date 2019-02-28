@@ -111,23 +111,22 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
     /**
      * Organise the different menu use by the application. It's a link between the method use for a picture and the  xml file : example_menu.xml
      */
-
     public boolean onOptionsItemSelected(MenuItem item) {
         seekbarlum.setVisibility(View.GONE);
         textLumi.setVisibility(View.GONE);
 
         switch(item.getItemId()){
-            // Cas où on clique sur la caméra pour accéder à l'appareil photo.
+            // click on the camera icon to access the camera of the phone
             case R.id.camera:
                 dispatchTakePictureIntent(); // Take a photo with a camera app
                 return true;
-            // Cas où on clique sur la flèche pour annuler un effet.
+            // click on the arrow to cancel effects
             case R.id.reset:
                 currentPictureUse = new Picture(originalPictureUse);
                 imageView.setImageBitmap(currentPictureUse.getBmp()); // On oublie pas de réafficher l'image
                 return true;
             case R.id.toGrey:
-                currentPictureUse.toGrey();
+                currentPictureUse.toGreyRS(getApplicationContext());
                 return true;
             case R.id.colorize:
                 colorPickerOption = 1;
@@ -138,7 +137,7 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                 openColorPicker();
                 return true;
             case R.id.contrastDynamicExten:
-                currentPictureUse.contrasDynamicExtensionRS(getApplicationContext());
+                currentPictureUse.contrastDynamicExtensionRS(getApplicationContext());
                 return true;
             case R.id.contrastEqualHisto:
                 currentPictureUse.contrastHistogramEqualizationYuvRS(getApplicationContext());
@@ -240,6 +239,7 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                 copycurrentPictureUse = new Picture(currentPictureUse);
                 return true;
 
+            //click on the import icon to access to the gallery
             case R.id.importFromGallery:
                 getImageFromGallery();
                 return true;
@@ -260,10 +260,13 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
 
 
     @Override
+    /**
+     * Treats the result of the activity depending on the request
+     */
     protected void onActivityResult(int requestCode, int resultCode, Intent data){
         super.onActivityResult(requestCode,resultCode,data);
         switch (requestCode){
-            case REQUEST_TAKE_PHOTO: { /* Dans le cas où l'on prend une photo avec la caméra */
+            case REQUEST_TAKE_PHOTO: { //to take a photo using the camera
                 if(resultCode == RESULT_OK){
                     File file = new File(currentPhotoPath);
                     Bitmap imageBitmap = null;
@@ -280,7 +283,7 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                 }
                 break;
             }
-            case(GALLERY_REQUEST): {
+            case(GALLERY_REQUEST): { //to import a photo from the gallery
                 if(resultCode == Activity.RESULT_OK){
                     onSelectFromGalleryResult(data);
                 }
@@ -288,6 +291,11 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
         }
     }
 
+    /**
+     * Create an image file
+     * @return the file
+     * @throws IOException
+     */
     public File createImageFile() throws IOException {
         // Create an image file name
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
@@ -393,7 +401,7 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
     }
 
     /**
-     * onRequestPermissionsResult : callback for the result from requesting permissions
+     * Callback for the result from requesting permissions
      * @param requestCode : code of the permission
      * @param permissions : requested permissions
      * @param grantResults : grant results for the corresponding permissions
