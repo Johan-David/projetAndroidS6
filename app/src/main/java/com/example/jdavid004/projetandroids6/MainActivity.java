@@ -128,7 +128,7 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                 return true;
 
             case R.id.toGrey:
-                currentPictureUse.toGrey();
+                //currentPictureUse.toGrey();
                 currentPictureUse.toGreyRS(getApplicationContext());
                 return true;
 
