@@ -2,6 +2,10 @@
 #pragma rs_fp_relaxed
 #pragma  rs  java_package_name(com.example.jdavid004.projetandroids6)
 
+/*
+* Source : https://medium.com/@qhutch/android-simple-and-fast-image-processing-with-renderscript-2fa8316273e1?fbclid=IwAR3Ok2_aQJaYtsm1VspW7ERBM-mb0Y9zc1APBvug9LTpFB-vlewaYyKMRUk
+*/
+
 #include "rs_debug.rsh"
 
 int32_t histo[256];
