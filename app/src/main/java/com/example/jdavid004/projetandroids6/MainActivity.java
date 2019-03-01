@@ -101,28 +101,37 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
             case R.id.camera:
                 dispatchTakePictureIntent(); // Take a photo with a camera app
                 return true;
+
             // click on the arrow to cancel effects
             case R.id.reset:
                 currentPictureUse = new Picture(originalPictureUse.getBmp());
                 imageView.setImageBitmap(currentPictureUse.getBmp()); // On oublie pas de réafficher l'image
                 return true;
+
             case R.id.toGrey:
+                //currentPictureUse.toGrey();
                 currentPictureUse.toGreyRS(getApplicationContext());
                 return true;
+
             case R.id.colorize:
                 colorPickerOption = 1;
                 openColorPicker();
                 return true;
+
             case R.id.colorOnly:
                 colorPickerOption = 2;
                 openColorPicker();
                 return true;
+
             case R.id.contrastDynamicExten:
+                //currentPictureUse.contrastDynamicExtensionRGBAverage();
                 currentPictureUse.contrastDynamicExtensionRS(getApplicationContext());
                 return true;
+
             case R.id.contrastEqualHisto:
                 currentPictureUse.contrastHistogramEqualizationYuvRS(getApplicationContext());
                 return true;
+
             case R.id.moyenneur:
                 int mWidthMoy = 3;
                 int mHeightMoy = mWidthMoy;
@@ -213,6 +222,7 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                 //contourLaplacien.computeRS(getApplicationContext());
                 contourLaplacien.computeIntrinsicConvolve(getApplicationContext());
                 return true;
+
             case R.id.Luminosity:
                 seekbarlum.setProgress(100);
                 seekbarlum.setVisibility(View.VISIBLE);
