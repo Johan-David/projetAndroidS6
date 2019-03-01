@@ -174,23 +174,42 @@ public class Picture  {
 
         float minHSV = hsvColor[0] - 20;
         float maxHSV =  hsvColor[0] + 20;
+        Log.i("DEBUG","ColorOnlyHSV min : " + minHSV);
+        Log.i("DEBUG","ColorOnlyHSV max : " + maxHSV);
+        //Cas où l'on définie une plage pour le rouge
         if(minHSV < 0){
             minHSV += 360;
+            Log.i("DEBUG","ColorOnlyHSV min dans le if : " + minHSV);
+
         }
+
         if(maxHSV >= 360){
             maxHSV -= 360;
+            Log.i("DEBUG","ColorOnlyHSV max dans le if: " + maxHSV);
         }
 
         for(int i = 0; i < pixels.length; i++) {
             Color.RGBToHSV(Color.red(pixels[i]), Color.green(pixels[i]), Color.blue(pixels[i]), hsv);
-
-            if (hsv[0] < minHSV || hsv[0] > maxHSV) {
-                int R = Color.red(pixels[i]);
-                int G = Color.green(pixels[i]);
-                int B = Color.blue(pixels[i]);
-                int Grey = (int) (0.3 * R + 0.59 * G + 0.11 * B);
-                pixels[i] = Color.rgb(Grey, Grey, Grey);
+            if(minHSV > maxHSV){
+                //Dans le cas où c'est une autre couleur que le rouge
+                if(hsv[0] > maxHSV && hsv[0] < minHSV ){
+                    //Log.i("DEBUG","ON PASSE DANS LE GRIS");
+                    int R = Color.red(pixels[i]);
+                    int G = Color.green(pixels[i]);
+                    int B = Color.blue(pixels[i]);
+                    int Grey = (int) (0.3 * R + 0.59 * G + 0.11 * B);
+                    pixels[i] = Color.rgb(Grey, Grey, Grey);
+                }
+            }else{
+                if(!(hsv[0]  >= minHSV && hsv[0] <= maxHSV) ){
+                    int R = Color.red(pixels[i]);
+                    int G = Color.green(pixels[i]);
+                    int B = Color.blue(pixels[i]);
+                    int Grey = (int) (0.3 * R + 0.59 * G + 0.11 * B);
+                    pixels[i] = Color.rgb(Grey, Grey, Grey);
+                }
             }
+
         }
         bmp.setPixels(pixels,0,bmp.getWidth(),0,0,bmp.getWidth(),bmp.getHeight());
     }
@@ -401,7 +420,6 @@ public class Picture  {
         bmp.getPixels(pixels,0,bmp.getWidth(),0,0,bmp.getWidth(),bmp.getHeight());
         int min = 255;
         int max = 0;
-        float LUT[] = new float[256];
 
         //Create new bitmap
         Bitmap res = bmp.copy(bmp.getConfig(), true);
@@ -426,9 +444,6 @@ public class Picture  {
                 max = average;
             }
         }
-        Log.i("java", "value of min " + min);
-        Log.i("java", "value of max " + max);
-
 
         //Create script from rs file.
         ScriptC_dynExtension test= new ScriptC_dynExtension(rs);
