@@ -174,18 +174,14 @@ public class Picture  {
 
         float minHSV = hsvColor[0] - 20;
         float maxHSV =  hsvColor[0] + 20;
-        Log.i("DEBUG","ColorOnlyHSV min : " + minHSV);
-        Log.i("DEBUG","ColorOnlyHSV max : " + maxHSV);
         //Cas où l'on définie une plage pour le rouge
         if(minHSV < 0){
             minHSV += 360;
-            Log.i("DEBUG","ColorOnlyHSV min dans le if : " + minHSV);
 
         }
 
         if(maxHSV >= 360){
             maxHSV -= 360;
-            Log.i("DEBUG","ColorOnlyHSV max dans le if: " + maxHSV);
         }
 
         for(int i = 0; i < pixels.length; i++) {
