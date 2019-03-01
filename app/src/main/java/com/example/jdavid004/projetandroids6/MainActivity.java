@@ -64,7 +64,7 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
 
         imageView = findViewById(R.id.vegetablePicture);
         originalPictureUse = new Picture(getResources());
-        currentPictureUse = new Picture(originalPictureUse);
+        currentPictureUse = new Picture(originalPictureUse.getBmp());
         imageView.setImageBitmap(currentPictureUse.getBmp());
 
         seekbarlum = (SeekBar)findViewById(R.id.seekbarlum);
@@ -122,7 +122,7 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                 return true;
             // click on the arrow to cancel effects
             case R.id.reset:
-                currentPictureUse = new Picture(originalPictureUse);
+                currentPictureUse = new Picture(originalPictureUse.getBmp());
                 imageView.setImageBitmap(currentPictureUse.getBmp()); // On oublie pas de réafficher l'image
                 return true;
             case R.id.toGrey:
@@ -236,7 +236,7 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                 seekbarlum.setProgress(100);
                 seekbarlum.setVisibility(View.VISIBLE);
                 textLumi.setVisibility(View.VISIBLE);
-                copycurrentPictureUse = new Picture(currentPictureUse);
+                copycurrentPictureUse = new Picture(currentPictureUse.getBmp());
                 return true;
 
             //click on the import icon to access to the gallery

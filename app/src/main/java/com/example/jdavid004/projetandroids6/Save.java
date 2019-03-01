@@ -1,16 +1,11 @@
 package com.example.jdavid004.projetandroids6;
 
-import android.Manifest;
-import android.app.AlertDialog;
+
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Environment;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -20,13 +15,11 @@ import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
-/**
- * Created by achauveau003 on 01/02/19.
- */
 
 
 /**
  * class Save : contains all the necessary methods to save an image
+ * @author Benjamin Darmet, Amandine Chauveau, Remi Barbosa, Johan David
  */
 public class Save {
     private Context TheThis;    //gets the current context

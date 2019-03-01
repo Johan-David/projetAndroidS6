@@ -11,49 +11,41 @@ import android.util.Log;
 
 import com.android.rssample.ScriptC_dynExtension;
 
-import java.util.Random;
-
 
 /**
- * Created by bdarmet on 25/01/19.
+ * It represents all the different treatments that an image can receive. A picture translate into a Bitmap and it dimensions.
+ * @author Benjamin Darmet, Amandine Chauveau, Remi Barbosa, Johan David
  */
-
 public class Picture  {
 
+    /**
+     * A Bitmap wich represent a picture.
+     */
     private Bitmap bmp;
+    /**
+     * Horizontal dimension of a picture
+     */
     private int width;
+    /**
+     * Vertical dimension of a picture
+     */
     private int height;
-    private int[] tabPixels;
 
-    public Bitmap getBmp() {
-        return bmp;
-    }
-
-    public void setBmp(Bitmap bmp) {
-        this.bmp = bmp;
-        this.width  = bmp.getWidth();
-        this.height = bmp.getHeight();
-
-    }
-
-    public int getWidth() {
-        return width;
-    }
-
-    public int getHeight() {
-        return height;
-    }
-
-    public int[] getTabPixels() {
-        return tabPixels;
-    }
-
+    /**
+     * Create a picture from a Bitmap
+     * @param bmp Bitmap representing the image to be stored
+     */
     Picture(Bitmap bmp){
         this.bmp = bmp.copy(bmp.getConfig(),true);
         this.width  = bmp.getWidth();
         this.height = bmp.getHeight();
     }
 
+
+    /**
+     * Create a picture from a basical photo stock in the application. it's the first image display on the app.
+     * @param resources
+     */
     Picture(Resources resources) {
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inMutable = true;
@@ -63,13 +55,9 @@ public class Picture  {
         this.height = bmp.getHeight();
     }
 
-    Picture(Picture picture) {
-        this.bmp = picture.getBmp().copy(picture.getBmp().getConfig(), true);
-        this.width = picture.getWidth();
-        this.height = picture.getHeight();
-        this.tabPixels = picture.getTabPixels();
-    }
-
+    /**
+     * Put through a treatment to the bmp to change the color in grey
+     */
     void toGrey(){
         int[] pixels = new int[bmp.getHeight()*bmp.getWidth()];
         this.bmp.getPixels(pixels,0,bmp.getWidth(),0,0,bmp.getWidth(),bmp.getHeight());
@@ -84,6 +72,10 @@ public class Picture  {
         this.bmp.setPixels(pixels,0,bmp.getWidth(),0,0,bmp.getWidth(),bmp.getHeight());
     }
 
+    /**
+     * Put through a treatment to the image to change the color in grey but in Renderscript.
+     * @param context Context of  the application
+     */
     void toGreyRS(Context context){
         RenderScript rs = RenderScript.create(context);
 
@@ -99,6 +91,12 @@ public class Picture  {
         input.destroy(); output.destroy();
         greyScript.destroy(); rs.destroy();
     }
+
+
+    /**
+     * Change the color of the image with the color selected
+     * @param color Color applicated on the image
+     */
 
     void colorize(int color){
         int[] pixels = new int[bmp.getHeight()*bmp.getWidth()];
@@ -116,6 +114,11 @@ public class Picture  {
         bmp.setPixels(pixels,0,bmp.getWidth(),0,0,bmp.getWidth(),bmp.getHeight());
     }
 
+    /**
+     * Change the color of the image with the color selected in RenderScript
+     * @param context Context of the application
+     * @param color Color applicated on the image
+     */
     void colorizeRS( Context context, int color){
         RenderScript  rs = RenderScript.create(context);
 
@@ -137,6 +140,9 @@ public class Picture  {
         colorizeScript.destroy(); rs.destroy();
     }
 
+    /**
+     * Keeps only the red color on the image. All the others are in grey.
+     */
     void redOnlyHsv(){
         int[] pixels = new int[bmp.getHeight()*bmp.getWidth()];
         bmp.getPixels(pixels,0,bmp.getWidth(),0,0,bmp.getWidth(),bmp.getHeight());
@@ -155,6 +161,45 @@ public class Picture  {
         bmp.setPixels(pixels,0,bmp.getWidth(),0,0,bmp.getWidth(),bmp.getHeight());
     }
 
+    /**
+     * Keeps only the selected color on the image. All the others are in grey.
+     * @param color Color that wants to be kept
+     */
+    void colorOnlyHsv( int color){
+        int[] pixels = new int[bmp.getHeight()*bmp.getWidth()];
+        bmp.getPixels(pixels,0,bmp.getWidth(),0,0,bmp.getWidth(),bmp.getHeight());
+        float[] hsv = new float[3];
+        float[] hsvColor = new float[3];
+        Color.RGBToHSV(Color.red(color),Color.green(color),Color.blue(color),hsvColor);
+
+        float minHSV = hsvColor[0] - 20;
+        float maxHSV =  hsvColor[0] + 20;
+        if(minHSV < 0){
+            minHSV += 360;
+        }
+        if(maxHSV >= 360){
+            maxHSV -= 360;
+        }
+
+        for(int i = 0; i < pixels.length; i++) {
+            Color.RGBToHSV(Color.red(pixels[i]), Color.green(pixels[i]), Color.blue(pixels[i]), hsv);
+
+            if (hsv[0] < minHSV || hsv[0] > maxHSV) {
+                int R = Color.red(pixels[i]);
+                int G = Color.green(pixels[i]);
+                int B = Color.blue(pixels[i]);
+                int Grey = (int) (0.3 * R + 0.59 * G + 0.11 * B);
+                pixels[i] = Color.rgb(Grey, Grey, Grey);
+            }
+        }
+        bmp.setPixels(pixels,0,bmp.getWidth(),0,0,bmp.getWidth(),bmp.getHeight());
+    }
+
+    /**
+     * Keeps only the selected color on the image. All the others are in grey.
+     * @param context Context of the application
+     * @param color Keeps only the selected color on the image. All the others are in grey.
+     */
     void colorOnlyHsvRS(Context context, int color){
         float[] hsvTab = new float[3];
         Color.RGBToHSV(Color.red(color),Color.green(color),Color.blue(color), hsvTab);
@@ -174,6 +219,9 @@ public class Picture  {
     }
 
 
+    /**
+     * Incrase the constrast of the image in grey using the dynamic extension method
+     */
     void contrastDynamicExtensionGrey(){
         int[] pixels = new int[bmp.getHeight()*bmp.getWidth()];
         bmp.getPixels(pixels,0,bmp.getWidth(),0,0,bmp.getWidth(),bmp.getHeight());
@@ -210,6 +258,9 @@ public class Picture  {
         bmp.setPixels(pixels,0,bmp.getWidth(),0,0,bmp.getWidth(),bmp.getHeight());
     }
 
+    /**
+     * Increases the image contrast by calculating the color value independently of the 3 RGB ranges through the dynamic extension method.
+     */
     void contrastDynamicExtensionRGBIndie(){
         int[] pixels = new int[bmp.getHeight()*bmp.getWidth()];
         bmp.getPixels(pixels,0,bmp.getWidth(),0,0,bmp.getWidth(),bmp.getHeight());
@@ -294,6 +345,9 @@ public class Picture  {
         bmp.setPixels(pixels,0,bmp.getWidth(),0,0,bmp.getWidth(),bmp.getHeight());
     }
 
+    /**
+     * Increases the image contrast by calculating the color value of a pixel by averaging the 3 RGB ranges accumulated through the dynamic extension method
+     */
     void contrastDynamicExtensionRGBAverage(){
         int[] pixels = new int[bmp.getHeight()*bmp.getWidth()];
         bmp.getPixels(pixels,0,bmp.getWidth(),0,0,bmp.getWidth(),bmp.getHeight());
@@ -335,7 +389,13 @@ public class Picture  {
         bmp.setPixels(pixels,0,bmp.getWidth(),0,0,bmp.getWidth(),bmp.getHeight());
     }
 
+
+    /**
+     * Increases the contrast of an image using the dynamic extension method in RenderScript
+     * @param context Context of the application
+     */
     void contrastDynamicExtensionRS(Context context){
+
         //Initialisation of the composant to compute the min and max
         int[] pixels = new int[bmp.getHeight()*bmp.getWidth()];
         bmp.getPixels(pixels,0,bmp.getWidth(),0,0,bmp.getWidth(),bmp.getHeight());
@@ -390,24 +450,26 @@ public class Picture  {
 
     }
 
-
+    /**
+     * Increases the contrast of the image in grey by equalizing its histogram.
+     */
     void contrastHistogramEqualizationGrey(){
         int[] pixels = new int[bmp.getHeight()*bmp.getWidth()];
         bmp.getPixels(pixels,0,bmp.getWidth(),0,0,bmp.getWidth(),bmp.getHeight());
         int[] H = new int[256];
 
-        //calcul de l'histogramme
+        //Calculation of the histogram
         for(int i = 0; i < pixels.length; i++){
             int grey = Color.red(pixels[i]);
             H[grey]++;
         }
 
-        //calcul de l'histogramme cumulé
+        //Calculation of the cumulative histogram
         for(int i = 1; i < 256; i++){
             H[i] = H[i] + H[i-1];
         }
 
-        //Transformation de l'image
+        //Applying the new values to pixels
         for(int i = 0; i < pixels.length; i++){
             int grey = Color.red(pixels[i]);
             int newGrey = (255*H[grey]) / pixels.length;
@@ -417,6 +479,9 @@ public class Picture  {
         bmp.setPixels(pixels,0,bmp.getWidth(),0,0,bmp.getWidth(),bmp.getHeight());
     }
 
+    /**
+     * Increases the contrast of the image by equalizing its histogram with the independent RGB ranges
+     */
     void contrastHistogramEqualizationRGBIndie(){
         int[] pixels = new int[bmp.getHeight()*bmp.getWidth()];
         bmp.getPixels(pixels,0,bmp.getWidth(),0,0,bmp.getWidth(),bmp.getHeight());
@@ -424,7 +489,7 @@ public class Picture  {
         int[] Hg = new int[256];
         int[] Hb = new int[256];
 
-        //calcul des histogrammes rouge, vert, bleu
+        //Calculation of the  différent histograms : Red histogram, Green histogram and Blue histogram
         for(int i = 0; i < pixels.length; i++){
             int red = Color.red(pixels[i]);
             Hr[red]++;
@@ -434,14 +499,14 @@ public class Picture  {
             Hb[blue]++;
         }
 
-        //calcul des histogrammes cumulés
+        //Calculation of the cumulative histogram
         for(int i = 1; i < 256; i++){
             Hr[i] = Hr[i] + Hr[i-1];
             Hg[i] = Hg[i] + Hg[i-1];
             Hb[i] = Hb[i] + Hb[i-1];
         }
 
-        //Transformation de l'image
+        //Applying the new values to pixels
         for(int i = 0; i < pixels.length; i++){
             int red = Color.red(pixels[i]);
             int newRed = (255*Hr[red])/pixels.length;
@@ -455,23 +520,26 @@ public class Picture  {
         bmp.setPixels(pixels,0,bmp.getWidth(),0,0,bmp.getWidth(),bmp.getHeight());
     }
 
+    /**
+     * Increases the contrast of the image by equalizing its histogram by averaging the values of the RGB ranges of each pixel
+     */
     void contrastHistogramEqualizationRGBAverage(){
         int[] pixels = new int[bmp.getHeight()*bmp.getWidth()];
         bmp.getPixels(pixels,0,bmp.getWidth(),0,0,bmp.getWidth(),bmp.getHeight());
         int[] H = new int[256];
 
-        //calcul de l'histogramme
+        //Calculation of the histogram
         for(int i = 0; i < pixels.length; i++){
             int average = (Color.red(pixels[i])+Color.green(pixels[i])+Color.blue(pixels[i])) / 3;
             H[average]++;
         }
 
-        //calcul de l'histogramme cumulé
+        //Calculation of the cumulative histogram
         for(int i = 1; i < 256; i++){
             H[i] = H[i] + H[i-1];
         }
 
-        //Transformation de l'image
+        //Applying the new values to pixels
         for(int i=0; i < pixels.length; i++){
             int red = Color.red(pixels[i]);
             int newRed = (255*H[red])/pixels.length;
@@ -485,6 +553,11 @@ public class Picture  {
         bmp.setPixels(pixels,0,bmp.getWidth(),0,0,bmp.getWidth(),bmp.getHeight());
     }
 
+    /**
+     * Equalizes the histogram of the image to increase its contrast using RenderScript
+     * @param context Context of the application
+     * @author Quentin mineni
+     */
     void contrastHistogramEqualizationYuvRS(Context context){
         //Get image size
         int width = bmp.getWidth();
@@ -527,6 +600,11 @@ public class Picture  {
         rs.destroy();
     }
 
+    /**
+     * Increases or decreases the brightness of the image depending on the selected increase or decrease in brightness
+     * @param pourcent Percentage of selected brightness
+     * @param picture Picture use to copy the value of a pixel of a bitmap where the brightness has not changed. In other words, it is a copy of the processed image.
+     */
     void AdjustLuminosity(int pourcent, Picture picture){
         if(pourcent==100){
             return;
@@ -549,6 +627,12 @@ public class Picture  {
         bmp.setPixels(pixels,0,bmp.getWidth(),0,0,bmp.getWidth(),bmp.getHeight());
     }
 
+    /**
+     *  Increases or decreases the brightness of the image depending on the selected increase or decrease in brightness in RenderScript
+     * @param context Context of the application
+     * @param pourcent Percentage of selected brightness
+     * @param picture Picture use to copy the value of a pixel of a bitmap where the brightness has not changed. In other words, it is a copy of the processed image
+     */
     void AdjustLuminosityRS(Context context, int pourcent, Picture picture){
         if(pourcent != 100){
             RenderScript rs = RenderScript.create(context);
@@ -568,5 +652,20 @@ public class Picture  {
             AdjustLuminosityHSVScript.destroy(); rs.destroy();
         }
     }
+
+
+    /* Getter & Setter */
+    public Bitmap getBmp() {
+        return bmp;
+    }
+
+    public int getWidth() {
+        return width;
+    }
+
+    public int getHeight() {
+        return height;
+    }
+
 
 }
