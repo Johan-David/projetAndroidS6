@@ -124,8 +124,8 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                 return true;
 
             case R.id.contrastDynamicExten:
-                //currentPictureUse.contrastDynamicExtensionRGBAverage();
-                currentPictureUse.contrastDynamicExtensionRS(getApplicationContext());
+                currentPictureUse.contrastDynamicExtensionRGBAverage();
+                //currentPictureUse.contrastDynamicExtensionRS(getApplicationContext());
                 return true;
 
             case R.id.contrastEqualHisto:
