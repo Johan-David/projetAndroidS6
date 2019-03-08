@@ -19,7 +19,7 @@ import com.android.rssample.ScriptC_dynExtension;
 public class Picture  {
 
     /**
-     * A Bitmap wich represent a picture.
+     * A Bitmap which represent a picture.
      */
     private Bitmap bmp;
     /**
@@ -30,6 +30,14 @@ public class Picture  {
      * Vertical dimension of a picture
      */
     private int height;
+    /**
+     * Array containing all the pixels of the bitmap
+     */
+    private int[] pixels;
+    /**
+     * Length of the array
+     */
+    private int length;
 
     /**
      * Create a picture from a Bitmap
@@ -37,8 +45,8 @@ public class Picture  {
      */
     Picture(Bitmap bmp){
         this.bmp = bmp.copy(bmp.getConfig(),true);
-        this.width  = bmp.getWidth();
-        this.height = bmp.getHeight();
+        setDimensions();
+        setPixels();
     }
 
 
@@ -51,25 +59,48 @@ public class Picture  {
         options.inMutable = true;
         options.inScaled = false;
         this.bmp = BitmapFactory.decodeResource(resources,R.drawable.vegetables,options);
+        setDimensions();
+        setPixels();
+    }
+
+    /* Getter & Setter */
+    public Bitmap getBmp() {
+        return bmp;
+    }
+
+    public int getWidth() {
+        return width;
+    }
+
+    public int getHeight() {
+        return height;
+    }
+
+    void setPixels(){
+        this.pixels = new int[width*height];
+        this.bmp.getPixels(pixels,0,width,0,0,width,height);
+        this.length = pixels.length;
+    }
+
+    void setDimensions(){
         this.width = bmp.getWidth();
         this.height = bmp.getHeight();
     }
+
+
 
     /**
      * Put through a treatment to the bmp to change the color in grey
      */
     void toGrey(){
-        int[] pixels = new int[bmp.getHeight()*bmp.getWidth()];
-        this.bmp.getPixels(pixels,0,bmp.getWidth(),0,0,bmp.getWidth(),bmp.getHeight());
-
-        for(int i = 0; i < pixels.length; i++){
+        for(int i = 0; i < length; i++){
             int R = Color.red(pixels[i]);
             int G = Color.green(pixels[i]);
             int B = Color.blue(pixels[i]);
             int Grey = (int)(0.3*R+0.59*G+0.11*B);
             pixels[i] = Color.rgb(Grey,Grey,Grey);
         }
-        this.bmp.setPixels(pixels,0,bmp.getWidth(),0,0,bmp.getWidth(),bmp.getHeight());
+        this.bmp.setPixels(pixels,0,width,0,0,width,height);
     }
 
     /**
@@ -99,19 +130,15 @@ public class Picture  {
      */
 
     void colorize(int color){
-        int[] pixels = new int[bmp.getHeight()*bmp.getWidth()];
-        bmp.getPixels(pixels,0,bmp.getWidth(),0,0,bmp.getWidth(),bmp.getHeight());
         float[] hsv = new float[3];
         float[] hsvColor = new float[3];
         Color.RGBToHSV(Color.red(color),Color.green(color),Color.blue(color),hsvColor);
-
-
-        for(int i = 0; i < pixels.length; i++){
+        for(int i = 0; i < length; i++){
             Color.RGBToHSV(Color.red(pixels[i]),Color.green(pixels[i]),Color.blue(pixels[i]),hsv);
             hsv[0] = hsvColor[0];
             pixels[i] = Color.HSVToColor(hsv);
         }
-        bmp.setPixels(pixels,0,bmp.getWidth(),0,0,bmp.getWidth(),bmp.getHeight());
+        bmp.setPixels(pixels,0,width,0,0,width,height);
     }
 
     /**
@@ -144,11 +171,9 @@ public class Picture  {
      * Keeps only the red color on the image. All the others are in grey.
      */
     void redOnlyHsv(){
-        int[] pixels = new int[bmp.getHeight()*bmp.getWidth()];
-        bmp.getPixels(pixels,0,bmp.getWidth(),0,0,bmp.getWidth(),bmp.getHeight());
         float[] hsv = new float[3];
 
-        for(int i = 0; i < pixels.length; i++) {
+        for(int i = 0; i < length; i++) {
             Color.RGBToHSV(Color.red(pixels[i]), Color.green(pixels[i]), Color.blue(pixels[i]), hsv);
             if (hsv[0] >= 15 && hsv[0] <= 345) {
                 int R = Color.red(pixels[i]);
@@ -158,7 +183,7 @@ public class Picture  {
                 pixels[i] = Color.rgb(Grey, Grey, Grey);
             }
         }
-        bmp.setPixels(pixels,0,bmp.getWidth(),0,0,bmp.getWidth(),bmp.getHeight());
+        bmp.setPixels(pixels,0,width,0,0,width,height);
     }
 
     /**
@@ -166,33 +191,44 @@ public class Picture  {
      * @param color Color that wants to be kept
      */
     void colorOnlyHsv( int color){
-        int[] pixels = new int[bmp.getHeight()*bmp.getWidth()];
-        bmp.getPixels(pixels,0,bmp.getWidth(),0,0,bmp.getWidth(),bmp.getHeight());
         float[] hsv = new float[3];
         float[] hsvColor = new float[3];
         Color.RGBToHSV(Color.red(color),Color.green(color),Color.blue(color),hsvColor);
 
         float minHSV = hsvColor[0] - 20;
         float maxHSV =  hsvColor[0] + 20;
+        //case red
         if(minHSV < 0){
             minHSV += 360;
         }
+
         if(maxHSV >= 360){
             maxHSV -= 360;
         }
 
-        for(int i = 0; i < pixels.length; i++) {
+        for(int i = 0; i < length; i++) {
             Color.RGBToHSV(Color.red(pixels[i]), Color.green(pixels[i]), Color.blue(pixels[i]), hsv);
-
-            if (hsv[0] < minHSV || hsv[0] > maxHSV) {
-                int R = Color.red(pixels[i]);
-                int G = Color.green(pixels[i]);
-                int B = Color.blue(pixels[i]);
-                int Grey = (int) (0.3 * R + 0.59 * G + 0.11 * B);
-                pixels[i] = Color.rgb(Grey, Grey, Grey);
+            if(minHSV > maxHSV){
+                //color other than red
+                if(hsv[0] > maxHSV && hsv[0] < minHSV ){
+                    int R = Color.red(pixels[i]);
+                    int G = Color.green(pixels[i]);
+                    int B = Color.blue(pixels[i]);
+                    int Grey = (int) (0.3 * R + 0.59 * G + 0.11 * B);
+                    pixels[i] = Color.rgb(Grey, Grey, Grey);
+                }
+            }else{
+                if(!(hsv[0]  >= minHSV && hsv[0] <= maxHSV) ){
+                    int R = Color.red(pixels[i]);
+                    int G = Color.green(pixels[i]);
+                    int B = Color.blue(pixels[i]);
+                    int Grey = (int) (0.3 * R + 0.59 * G + 0.11 * B);
+                    pixels[i] = Color.rgb(Grey, Grey, Grey);
+                }
             }
+
         }
-        bmp.setPixels(pixels,0,bmp.getWidth(),0,0,bmp.getWidth(),bmp.getHeight());
+        bmp.setPixels(pixels,0,width,0,0,width,height);
     }
 
     /**
@@ -220,16 +256,14 @@ public class Picture  {
 
 
     /**
-     * Incrase the constrast of the image in grey using the dynamic extension method
+     * Increase the contrast of the image in grey using the dynamic extension method
      */
     void contrastDynamicExtensionGrey(){
-        int[] pixels = new int[bmp.getHeight()*bmp.getWidth()];
-        bmp.getPixels(pixels,0,bmp.getWidth(),0,0,bmp.getWidth(),bmp.getHeight());
         int min = 255;
         int max = 0;
         int[] LUT = new int[256];
 
-        for(int i = 0; i < pixels.length; i++){
+        for(int i = 0; i < length; i++){
             int grey = Color.red(pixels[i]);
             if(grey < min){
                 min = grey;
@@ -250,7 +284,7 @@ public class Picture  {
             }
         }
 
-        for(int i = 0; i < pixels.length; i++){
+        for(int i = 0; i < length; i++){
             int grey = Color.red(pixels[i]);
             pixels[i] = Color.rgb(LUT[grey],LUT[grey],LUT[grey]);
         }
@@ -262,8 +296,6 @@ public class Picture  {
      * Increases the image contrast by calculating the color value independently of the 3 RGB ranges through the dynamic extension method.
      */
     void contrastDynamicExtensionRGBIndie(){
-        int[] pixels = new int[bmp.getHeight()*bmp.getWidth()];
-        bmp.getPixels(pixels,0,bmp.getWidth(),0,0,bmp.getWidth(),bmp.getHeight());
         int minRed = 255;
         int maxRed = 0;
         int minGreen = 255;
@@ -275,7 +307,7 @@ public class Picture  {
         int[] LUTg = new int[256];
         int[] LUTb = new int[256];
 
-        for(int i = 0; i < pixels.length; i++){
+        for(int i = 0; i < length; i++){
             int red = Color.red(pixels[i]);
             if(red < minRed){
                 minRed = red;
@@ -332,7 +364,7 @@ public class Picture  {
             }
         }
 
-        for(int i = 0; i < pixels.length; i++){
+        for(int i = 0; i < length; i++){
             int red = Color.red(pixels[i]);
             int green = Color.green(pixels[i]);
             int blue = Color.blue(pixels[i]);
@@ -342,20 +374,18 @@ public class Picture  {
             pixels[i] = Color.rgb(newRed,newGreen,newBlue);
         }
 
-        bmp.setPixels(pixels,0,bmp.getWidth(),0,0,bmp.getWidth(),bmp.getHeight());
+        bmp.setPixels(pixels,0,width,0,0,width,height);
     }
 
     /**
      * Increases the image contrast by calculating the color value of a pixel by averaging the 3 RGB ranges accumulated through the dynamic extension method
      */
     void contrastDynamicExtensionRGBAverage(){
-        int[] pixels = new int[bmp.getHeight()*bmp.getWidth()];
-        bmp.getPixels(pixels,0,bmp.getWidth(),0,0,bmp.getWidth(),bmp.getHeight());
         int min = 255;
         int max = 0;
         int[] LUT = new int[256];
 
-        for(int i = 0; i < pixels.length; i++){
+        for(int i = 0; i < length; i++){
             int average = (Color.red(pixels[i])+Color.green(pixels[i])+Color.blue(pixels[i])) / 3;
             if(average < min){
                 min = average;
@@ -376,7 +406,7 @@ public class Picture  {
             }
         }
 
-        for(int i=0;i<pixels.length;i++){
+        for(int i=0;i<length;i++){
             int red = Color.red(pixels[i]);
             int green = Color.green(pixels[i]);
             int blue = Color.blue(pixels[i]);
@@ -386,7 +416,7 @@ public class Picture  {
             pixels[i] = Color.rgb(newRed,newGreen,newBlue);
         }
 
-        bmp.setPixels(pixels,0,bmp.getWidth(),0,0,bmp.getWidth(),bmp.getHeight());
+        bmp.setPixels(pixels,0,width,0,0,width,height);
     }
 
 
@@ -397,11 +427,8 @@ public class Picture  {
     void contrastDynamicExtensionRS(Context context){
 
         //Initialisation of the composant to compute the min and max
-        int[] pixels = new int[bmp.getHeight()*bmp.getWidth()];
-        bmp.getPixels(pixels,0,bmp.getWidth(),0,0,bmp.getWidth(),bmp.getHeight());
         int min = 255;
         int max = 0;
-        float LUT[] = new float[256];
 
         //Create new bitmap
         Bitmap res = bmp.copy(bmp.getConfig(), true);
@@ -417,7 +444,7 @@ public class Picture  {
 
 
         //Calcul of min and max not in Renderscript.
-        for(int i = 0; i < pixels.length; i++){
+        for(int i = 0; i < length; i++){
             int average = (Color.red(pixels[i])+Color.green(pixels[i])+Color.blue(pixels[i])) / 3;
             if(average < min){
                 min = average;
@@ -426,9 +453,6 @@ public class Picture  {
                 max = average;
             }
         }
-        Log.i("java", "value of min " + min);
-        Log.i("java", "value of max " + max);
-
 
         //Create script from rs file.
         ScriptC_dynExtension test= new ScriptC_dynExtension(rs);
@@ -454,12 +478,10 @@ public class Picture  {
      * Increases the contrast of the image in grey by equalizing its histogram.
      */
     void contrastHistogramEqualizationGrey(){
-        int[] pixels = new int[bmp.getHeight()*bmp.getWidth()];
-        bmp.getPixels(pixels,0,bmp.getWidth(),0,0,bmp.getWidth(),bmp.getHeight());
         int[] H = new int[256];
 
         //Calculation of the histogram
-        for(int i = 0; i < pixels.length; i++){
+        for(int i = 0; i < length; i++){
             int grey = Color.red(pixels[i]);
             H[grey]++;
         }
@@ -470,27 +492,25 @@ public class Picture  {
         }
 
         //Applying the new values to pixels
-        for(int i = 0; i < pixels.length; i++){
+        for(int i = 0; i < length; i++){
             int grey = Color.red(pixels[i]);
             int newGrey = (255*H[grey]) / pixels.length;
             pixels[i] = Color.rgb(newGrey,newGrey,newGrey);
         }
 
-        bmp.setPixels(pixels,0,bmp.getWidth(),0,0,bmp.getWidth(),bmp.getHeight());
+        bmp.setPixels(pixels,0,width,0,0,width,height);
     }
 
     /**
      * Increases the contrast of the image by equalizing its histogram with the independent RGB ranges
      */
     void contrastHistogramEqualizationRGBIndie(){
-        int[] pixels = new int[bmp.getHeight()*bmp.getWidth()];
-        bmp.getPixels(pixels,0,bmp.getWidth(),0,0,bmp.getWidth(),bmp.getHeight());
         int[] Hr = new int[256];
         int[] Hg = new int[256];
         int[] Hb = new int[256];
 
         //Calculation of the  différent histograms : Red histogram, Green histogram and Blue histogram
-        for(int i = 0; i < pixels.length; i++){
+        for(int i = 0; i < length; i++){
             int red = Color.red(pixels[i]);
             Hr[red]++;
             int green = Color.green(pixels[i]);
@@ -507,29 +527,27 @@ public class Picture  {
         }
 
         //Applying the new values to pixels
-        for(int i = 0; i < pixels.length; i++){
+        for(int i = 0; i < length; i++){
             int red = Color.red(pixels[i]);
-            int newRed = (255*Hr[red])/pixels.length;
+            int newRed = (255*Hr[red])/length;
             int green = Color.green(pixels[i]);
-            int newGreen = (255*Hg[green]) / pixels.length;
+            int newGreen = (255*Hg[green]) / length;
             int blue = Color.blue(pixels[i]);
-            int newBlue = (255*Hb[blue]) / pixels.length;
+            int newBlue = (255*Hb[blue]) / length;
             pixels[i] = Color.rgb(newRed,newGreen,newBlue);
         }
 
-        bmp.setPixels(pixels,0,bmp.getWidth(),0,0,bmp.getWidth(),bmp.getHeight());
+        bmp.setPixels(pixels,0,width,0,0,width,height);
     }
 
     /**
      * Increases the contrast of the image by equalizing its histogram by averaging the values of the RGB ranges of each pixel
      */
     void contrastHistogramEqualizationRGBAverage(){
-        int[] pixels = new int[bmp.getHeight()*bmp.getWidth()];
-        bmp.getPixels(pixels,0,bmp.getWidth(),0,0,bmp.getWidth(),bmp.getHeight());
         int[] H = new int[256];
 
         //Calculation of the histogram
-        for(int i = 0; i < pixels.length; i++){
+        for(int i = 0; i < length; i++){
             int average = (Color.red(pixels[i])+Color.green(pixels[i])+Color.blue(pixels[i])) / 3;
             H[average]++;
         }
@@ -540,17 +558,17 @@ public class Picture  {
         }
 
         //Applying the new values to pixels
-        for(int i=0; i < pixels.length; i++){
+        for(int i=0; i < length; i++){
             int red = Color.red(pixels[i]);
-            int newRed = (255*H[red])/pixels.length;
+            int newRed = (255*H[red])/length;
             int green = Color.green(pixels[i]);
-            int newGreen = (255*H[green])/pixels.length;
+            int newGreen = (255*H[green])/length;
             int blue = Color.blue(pixels[i]);
-            int newBlue = (255*H[blue])/pixels.length;
+            int newBlue = (255*H[blue])/length;
             pixels[i] = Color.rgb(newRed,newGreen,newBlue);
         }
 
-        bmp.setPixels(pixels,0,bmp.getWidth(),0,0,bmp.getWidth(),bmp.getHeight());
+        bmp.setPixels(pixels,0,width,0,0,width,height);
     }
 
     /**
@@ -559,9 +577,6 @@ public class Picture  {
      * @author Quentin mineni
      */
     void contrastHistogramEqualizationYuvRS(Context context){
-        //Get image size
-        int width = bmp.getWidth();
-        int height = bmp.getHeight();
 
         //Create new bitmap
         Bitmap res = bmp.copy(bmp.getConfig(), true);
@@ -609,12 +624,11 @@ public class Picture  {
         if(pourcent==100){
             return;
         }
-        int[] pixels = new int[bmp.getHeight()*bmp.getWidth()];
-        picture.getBmp().getPixels(pixels,0,bmp.getWidth(),0,0,bmp.getWidth(),bmp.getHeight());
+
         float[] hsv = new float[3];
         float luminosity = pourcent/100.f;
 
-        for(int i = 0; i < pixels.length; i++) {
+        for(int i = 0; i < length; i++) {
             Color.RGBToHSV(Color.red(pixels[i]), Color.green(pixels[i]), Color.blue(pixels[i]), hsv);
             float newValue = hsv[2]*luminosity;
             if(newValue > 1){
@@ -624,7 +638,7 @@ public class Picture  {
             }
             pixels[i] = Color.HSVToColor(hsv);
         }
-        bmp.setPixels(pixels,0,bmp.getWidth(),0,0,bmp.getWidth(),bmp.getHeight());
+        bmp.setPixels(pixels,0,width,0,0,width,height);
     }
 
     /**
@@ -653,19 +667,6 @@ public class Picture  {
         }
     }
 
-
-    /* Getter & Setter */
-    public Bitmap getBmp() {
-        return bmp;
-    }
-
-    public int getWidth() {
-        return width;
-    }
-
-    public int getHeight() {
-        return height;
-    }
 
 
 }

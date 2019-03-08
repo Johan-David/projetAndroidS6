@@ -78,25 +78,6 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
         mDefaultColor = ContextCompat.getColor(MainActivity.this, R.color.colorPrimary);
     }
 
-
-    public void openColorPicker(){
-        final AmbilWarnaDialog colorPicker = new AmbilWarnaDialog(this, mDefaultColor, new AmbilWarnaDialog.OnAmbilWarnaListener() {
-            public void onCancel(AmbilWarnaDialog dialog) {
-
-            }
-            public void onOk(AmbilWarnaDialog dialog, int color) {
-                mDefaultColor = color;
-                if(colorPickerOption == 1){
-                    currentPictureUse.colorizeRS(getApplicationContext(), mDefaultColor);
-                }
-                if(colorPickerOption == 2){
-                    currentPictureUse.colorOnlyHsvRS(getApplicationContext(), mDefaultColor);
-                }
-            }
-        });
-        colorPicker.show();
-    }
-
     @Override
     /**
      * Set up the menu to choose the different image processing options.
@@ -397,6 +378,24 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                 Toast.makeText(this,"Permission denied",Toast.LENGTH_SHORT).show();
             }
         }
+    }
+
+    public void openColorPicker(){
+        final AmbilWarnaDialog colorPicker = new AmbilWarnaDialog(this, mDefaultColor, new AmbilWarnaDialog.OnAmbilWarnaListener() {
+            public void onCancel(AmbilWarnaDialog dialog) {
+
+            }
+            public void onOk(AmbilWarnaDialog dialog, int color) {
+                mDefaultColor = color;
+                if(colorPickerOption == 1){
+                    currentPictureUse.colorizeRS(getApplicationContext(), mDefaultColor);
+                }
+                if(colorPickerOption == 2){
+                    currentPictureUse.colorOnlyHsvRS(getApplicationContext(), mDefaultColor);
+                }
+            }
+        });
+        colorPicker.show();
     }
 
     @Override

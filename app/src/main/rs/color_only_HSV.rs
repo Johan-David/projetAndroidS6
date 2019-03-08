@@ -33,9 +33,16 @@ uchar4  RS_KERNEL  color_only_hsv(uchar4  in){
         pixelh=60*((pixelf.r-pixelf.g)/(deltaRGB))+240;
     }
 
-    if (pixelh < minHSV || pixelh > maxHSV) {
-        float Grey = (0.3 * pixelf.r + 0.59 * pixelf.g + 0.11 * pixelf.b);
-        return rsPackColorTo8888(Grey,Grey,Grey,pixelf.a);
+    if(minHSV > maxHSV){
+        if (pixelh > maxHSV && pixelh < minHSV) {
+            float Grey = (0.3 * pixelf.r + 0.59 * pixelf.g + 0.11 * pixelf.b);
+            return rsPackColorTo8888(Grey,Grey,Grey,pixelf.a);
+           }
+    }else{
+        if(!(pixelh >= minHSV && pixelh <= maxHSV) ){
+               float Grey = (0.3 * pixelf.r + 0.59 * pixelf.g + 0.11 * pixelf.b);
+               return rsPackColorTo8888(Grey,Grey,Grey,pixelf.a);
+        }
     }
 
     return in;
