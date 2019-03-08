@@ -70,7 +70,7 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
         seekbarlum = (SeekBar)findViewById(R.id.seekbarlum);
         seekbarlum.setVisibility(View.GONE);
         seekbarlum.setOnSeekBarChangeListener(this);
-        seekbarlum.setMax(300);
+        seekbarlum.setMax(200);
         textLumi = (TextView) findViewById(R.id.textLumi);
         textLumi.setVisibility(View.GONE);
 
@@ -143,8 +143,8 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                 return true;
 
             case R.id.contrastDynamicExten:
-                //currentPictureUse.contrastDynamicExtensionRGBAverage();
-                currentPictureUse.contrastDynamicExtensionRS(getApplicationContext());
+                currentPictureUse.contrastDynamicExtensionRGBAverage();
+                //currentPictureUse.contrastDynamicExtensionRS(getApplicationContext());
                 return true;
 
             case R.id.contrastEqualHisto:
@@ -162,23 +162,16 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                 }
                 Convolution blur = new Convolution(currentPictureUse, matrixMoy, mWidthMoy, mHeightMoy, false, true);
                 //blur.compute();
-                //blur.computeRS(getApplicationContext());
-                blur.computeIntrinsicConvolve(getApplicationContext());
+                blur.computeRS(getApplicationContext());
+                //blur.computeIntrinsicConvolve(getApplicationContext());
                 return true;
 
             case R.id.gaussien:
                 int mWidthGauss = 3;
                 int mHeightGauss = mWidthGauss;
-                int[][] matrixGauss = new int[mWidthGauss][mHeightGauss];
-                matrixGauss[0][0] = 1;
-                matrixGauss[0][1] = 2;
-                matrixGauss[0][2] = 1;
-                matrixGauss[1][0] = 2;
-                matrixGauss[1][1] = 4;
-                matrixGauss[1][2] = 2;
-                matrixGauss[2][0] = 1;
-                matrixGauss[2][1] = 2;
-                matrixGauss[2][2] = 1;
+                int [][] matrixGauss = { {1,2,1},
+                                         {2,4,2},
+                                         {1,2,1} };
                 Convolution gaussien = new Convolution(currentPictureUse, matrixGauss, mWidthGauss, mHeightGauss, false, true);
                 //gaussien.compute();
                 //gaussien.computeRS(getApplicationContext());
@@ -188,35 +181,21 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
             case R.id.prewitt:
                 int mWidthPrewitt = 3;
                 int mHeightPrewitt = mWidthPrewitt;
-                int[][] matrixPrewitt = new int[mWidthPrewitt][mHeightPrewitt];
-                matrixPrewitt[0][0] = -1;
-                matrixPrewitt[0][1] = 0;
-                matrixPrewitt[0][2] = 1;
-                matrixPrewitt[1][0] = -1;
-                matrixPrewitt[1][1] = 0;
-                matrixPrewitt[1][2] = 1;
-                matrixPrewitt[2][0] = -1;
-                matrixPrewitt[2][1] = 0;
-                matrixPrewitt[2][2] = 1;
+                int[][] matrixPrewitt = { {-1,0,1},
+                                          {-1,0,1},
+                                          {-1,0,1} };
                 Convolution contourPrewitt = new Convolution(currentPictureUse, matrixPrewitt, mWidthPrewitt, mHeightPrewitt,true, false);
                 //contourPrewitt.compute();
-                //contourPrewitt.computeRS(getApplicationContext());
-                contourPrewitt.computeIntrinsicConvolve(getApplicationContext());
+                contourPrewitt.computeRS(getApplicationContext());
+                //contourPrewitt.computeIntrinsicConvolve(getApplicationContext());
                 return true;
 
             case R.id.sobel:
                 int mWidthSobel = 3;
                 int mHeightSobel = mWidthSobel;
-                int[][] matrixSobel = new int[mWidthSobel][mHeightSobel];
-                matrixSobel[0][0] = -1;
-                matrixSobel[0][1] = 0;
-                matrixSobel[0][2] = 1;
-                matrixSobel[1][0] = -2;
-                matrixSobel[1][1] = 0;
-                matrixSobel[1][2] = 2;
-                matrixSobel[2][0] = -1;
-                matrixSobel[2][1] = 0;
-                matrixSobel[2][2] = 1;
+                int[][] matrixSobel = { {-1,0,1},
+                                        {-2,0,2},
+                                        {-1,0,1} };
                 Convolution contourSobel= new Convolution(currentPictureUse, matrixSobel, mWidthSobel, mHeightSobel,true, false);
                 //contourSobel.compute();
                 //contourSobel.computeRS(getApplicationContext());
@@ -226,16 +205,9 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
             case R.id.laplacien:
                 int mWidthLaplacien = 3;
                 int mHeightLaplacien = mWidthLaplacien;
-                int [][] matrixLaplacien = new int [mWidthLaplacien][mHeightLaplacien];
-                matrixLaplacien[0][0] = 0;
-                matrixLaplacien[0][1] = 1;
-                matrixLaplacien[0][2] = 0;
-                matrixLaplacien[1][0] = 1;
-                matrixLaplacien[1][1] = -4;
-                matrixLaplacien[1][2] = 1;
-                matrixLaplacien[2][0] = 0;
-                matrixLaplacien[2][1] = 1;
-                matrixLaplacien[2][2] = 0;
+                int [][] matrixLaplacien = { {0,1,0},
+                                             {1,-4,1},
+                                             {0,1,0} };
                 Convolution contourLaplacien = new Convolution(currentPictureUse, matrixLaplacien, mWidthLaplacien, mHeightLaplacien, false, false);
                 //contourLaplacien.compute();
                 //contourLaplacien.computeRS(getApplicationContext());
@@ -440,7 +412,7 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
     @Override
     public void onStopTrackingTouch(SeekBar seekBar) {
         //currentPictureUse.AdjustLuminosity(seekBar.getProgress(),copycurrentPictureUse);
-        currentPictureUse.AdjustLuminosityRS(getApplicationContext(),seekBar.getProgress(),copycurrentPictureUse);
+        currentPictureUse.AdjustLuminosityRS(getApplicationContext(),seekBar.getProgress()+25,copycurrentPictureUse);
     }
 
 }

@@ -22,8 +22,8 @@ public class Convolution {
     private int[][] matrix;
     private int m_width;
     private int m_height;
-    private int factor;     //Somme des valeurs de la matrice
-    private boolean secondApplyWithMatrixTranslation = false;   //Utiliser pour appliquer les 2 matrices h1 et h2 du cours avec une seule matrice
+    private int factor;     //Sum of the matrix's values
+    private boolean secondApplyWithMatrixTranslation = false;   //Used to apply a matrix and its translation
     private boolean normalize;
 
     Convolution(Picture picture, int[][] mat, int width, int height, boolean secondApplyWithMatrixTranslation, boolean normalize){
@@ -47,10 +47,10 @@ public class Convolution {
         int height = picture.getHeight();
         int width = picture.getWidth();
         int[] SrcPixels = new int[height*width];
-        bmp.getPixels(SrcPixels,0,width,0,0,width,height);  //obtenir à partir de picture (comme plus haut)
+        bmp.getPixels(SrcPixels,0,width,0,0,width,height);
         int[] ResPixels = SrcPixels.clone();
 
-        //Ces 6 variables ne servent que dans le cas d'un contour
+        //These 6 variables are only used when a contour is applied
         int maxModuleGradiantRed = 0;
         int maxModuleGradiantGreen = 0;
         int maxModuleGradiantBlue = 0;
@@ -59,9 +59,9 @@ public class Convolution {
         int[] GradiantGreen = new int[height*width];
         int[] GradiantBlue = new int[height*width];
 
-        for(int y = 0; y < height-this.m_height+1; y++){                   //Parcours de l'image comme dans le cours
+        for(int y = 0; y < height-this.m_height+1; y++){                   //Run through the image from left to right, downhill
             for(int x = 0; x < width-this.m_width+1; x++){
-                int index_center = ((x + (this.m_width/2)) + (y + (this.m_height/2))*width);   //Indice du pixel au centre de la matrice
+                int index_center = ((x + (this.m_width/2)) + (y + (this.m_height/2))*width);   //pixel's index in the center of the matrix
                 int sumRed = 0;
                 int sumGreen = 0;
                 int sumBlue = 0;
@@ -70,16 +70,16 @@ public class Convolution {
                 int sumGreen2 = 0;
                 int sumBlue2 = 0;
 
-                for(int my = 0; my < this.m_height; my++){                          //Parcours de la matrice
+                for(int my = 0; my < this.m_height; my++){                          //Run through the matrix
                     for(int mx = 0; mx < this.m_width; mx++){
-                        int curPixel = SrcPixels[(x+mx)+(y+my)*bmp.getWidth()];     //Pixels couvèrent par la matrice
-                        int mValue = matrix[mx][my];                                //Valeur de la matrice en (mx,my)
+                        int curPixel = SrcPixels[(x+mx)+(y+my)*bmp.getWidth()];     //Pixels covered by the matrix
+                        int mValue = matrix[mx][my];                                //Value of the matrix in (mx, my)
                         sumRed = sumRed + (Color.red(curPixel)*mValue);
                         sumGreen = sumGreen + (Color.green(curPixel)*mValue);
                         sumBlue = sumBlue + (Color.blue(curPixel)*mValue);
 
                         if(secondApplyWithMatrixTranslation){
-                            mValue = matrix[my][mx];                                //Valeur de la matrice en (my,mx)
+                            mValue = matrix[my][mx];                                //Value of the matrix in (my, mx)
                             sumRed2 = sumRed2 + (Color.red(curPixel)*mValue);
                             sumGreen2 = sumGreen2 + (Color.green(curPixel)*mValue);
                             sumBlue2 = sumBlue2 + (Color.blue(curPixel)*mValue);
@@ -144,11 +144,11 @@ public class Convolution {
         }
 
         if(secondApplyWithMatrixTranslation){
-            for(int y = 0; y < height - this.m_height+1; y++) {                   //Parcours de l'image comme dans le cours
+            for(int y = 0; y < height - this.m_height+1; y++) {                   //Run through the image from left to right, downhill
                 for (int x = 0; x < width - this.m_width + 1; x++) {
-                    int index_center = ((x + (this.m_width / 2)) + (y + (this.m_height / 2)) * width);   //Indice du pixel au centre de la matrice
+                    int index_center = ((x + (this.m_width / 2)) + (y + (this.m_height / 2)) * width);   //pixel's index in the center of the matrix
 
-                    float newRed = (GradiantRed[index_center] / (float)maxModuleGradiantRed) * 255;          //normalisation par le max
+                    float newRed = (GradiantRed[index_center] / (float)maxModuleGradiantRed) * 255;          //notrmalization by the max
                     float newGreen = (GradiantGreen[index_center] / (float)maxModuleGradiantGreen) * 255;
                     float newBlue = (GradiantBlue[index_center] / (float)maxModuleGradiantBlue) * 255;
                     ResPixels[index_center] = Color.rgb((int)newRed, (int)newGreen, (int)newBlue);
@@ -156,19 +156,19 @@ public class Convolution {
             }
         }
 
-        if(this.m_width == this.m_height  && this.m_height == 3){                           //Gestion des bords pour filtre 3x3
+        if(this.m_width == this.m_height  && this.m_height == 3){                           //Edge management for 3x3 filter
             for(int y = 0; y < height; y++){
                 for(int x = 0; x < width; x++){
-                    if(y == 0 && x != 0 && x != width-1){                          //cas du bord haut sans le coin
+                    if(y == 0 && x != 0 && x != width-1){                          //case of the upper edge without corner
                         ResPixels[x+y*bmp.getWidth()] = ResPixels[x+(y+1)*bmp.getWidth()];
                     }
-                    if(y == height-1 && x != 0 && x != height-1){          //cas du bord bas sans le coin
+                    if(y == height-1 && x != 0 && x != height-1){          //case of the lower edge without corner
                         ResPixels[x+y*width] = ResPixels[x+(y-1)*width];
                     }
-                    if(x == 0){                                                             //cas du bord gauche
+                    if(x == 0){                                                             //case of the left edge
                         ResPixels[x+y*width] = ResPixels[(x+1)+y*width];
                     }
-                    if(x == width-1){                                              //cas du bord droit
+                    if(x == width-1){                                              //case of the right edge
                         ResPixels[x+y*width] = ResPixels[(x-1)+y*width];
                     }
 
@@ -176,7 +176,7 @@ public class Convolution {
             }
         }
 
-        bmp.setPixels(ResPixels,0,width,0,0,width,height);   //Affectation des nouveaux pixels à l'image
+        bmp.setPixels(ResPixels,0,width,0,0,width,height);   //Assigning new pixels to the image
     }
 
 
@@ -196,7 +196,7 @@ public class Convolution {
         int k = 0;
         for(int i = 0; i < m_width; i++){
             for(int j = 0;  j < m_height; j++){
-                matrix1d[k] = matrix[i][j];     //On aplatit la matrice
+                matrix1d[k] = matrix[i][j];     //Flatten the matrix
                 k++;
             }
         }
@@ -205,11 +205,23 @@ public class Convolution {
         mat.copyFrom(matrix1d);
         convolutionScript.bind_kmatrix(mat);
         convolutionScript.set_kdiv(factor);
-        convolutionScript.set_normal(true);
+        convolutionScript.set_normal(normalize);
         convolutionScript.set_gIn(inAllocation);
 
         convolutionScript.invoke_setup();
         convolutionScript.forEach_root(inAllocation,outAllocation);
+        if(secondApplyWithMatrixTranslation){
+            k = 0;
+            for(int i = 0; i < m_width; i++){
+                for(int j = 0;  j < m_height; j++){
+                    matrix1d[k] = matrix[j][i];     //Flatten the matrix translated
+                    k++;
+                }
+            }
+            mat.copyFrom(matrix1d);
+            convolutionScript.bind_kmatrix(mat);
+            convolutionScript.forEach_root(inAllocation,outAllocation);
+        }
 
         outAllocation.copyTo(bmp);
 
