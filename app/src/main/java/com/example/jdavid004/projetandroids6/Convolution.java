@@ -201,7 +201,7 @@ public class Convolution {
             }
         }
         convolutionScript.set_ksize(m_width);
-        Allocation mat = Allocation.createSized(rs, Element.I32(rs),matrix1d.length);
+        Allocation mat = Allocation.createSized(rs, Element.I32(rs), matrix1d.length);
         mat.copyFrom(matrix1d);
         convolutionScript.bind_kmatrix(mat);
         convolutionScript.set_kdiv(factor);

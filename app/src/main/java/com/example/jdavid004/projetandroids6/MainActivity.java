@@ -40,17 +40,17 @@ import yuku.ambilwarna.AmbilWarnaDialog;
 
 
 public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBarChangeListener{
-    /* color picker variable */
+    /* color picker variables */
     private int mDefaultColor = 0;
     private int colorPickerOption = 0;
 
 
-    private ZoomageView imageView;
-    private Picture originalPictureUse;
-    private Picture currentPictureUse;
-    private Picture copycurrentPictureUse;
-    private SeekBar seekbarlum;
-    private TextView textLumi;
+    private ZoomageView imageView;      //View of the image of type ZoomageView which extends type ImageView
+    private Picture originalPictureUse; //The original picture we are using
+    private Picture currentPictureUse;  //The current picture we are using
+    private Picture copycurrentPictureUse;  //A copy of the current picture we are using
+    private SeekBar seekbarlum;         //cursor bar to modify luminosity
+    private TextView textLumi;          //Text indication for luminosity
     private String currentPhotoPath;
     private static final int GALLERY_REQUEST = 1314;
     private static final int REQUEST_TAKE_PHOTO = 1;
@@ -167,8 +167,8 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                                           {-1,0,1} };
                 Convolution contourPrewitt = new Convolution(currentPictureUse, matrixPrewitt, mWidthPrewitt, mHeightPrewitt,true, false);
                 //contourPrewitt.compute();
-                contourPrewitt.computeRS(getApplicationContext());
-                //contourPrewitt.computeIntrinsicConvolve(getApplicationContext());
+                //contourPrewitt.computeRS(getApplicationContext());
+                contourPrewitt.computeIntrinsicConvolve(getApplicationContext());
                 return true;
 
             case R.id.sobel:
