@@ -122,7 +122,9 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                 colorPickerOption = 2;
                 openColorPicker();
                 return true;
-
+            case R.id.sepia:
+                currentPictureUse.sepia();
+                return true;
             case R.id.contrastDynamicExten:
                 currentPictureUse.contrastDynamicExtensionRGBAverage();
                 //currentPictureUse.contrastDynamicExtensionRS(getApplicationContext());

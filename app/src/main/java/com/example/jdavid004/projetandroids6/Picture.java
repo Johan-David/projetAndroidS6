@@ -123,6 +123,22 @@ public class Picture  {
         greyScript.destroy(); rs.destroy();
     }
 
+    void sepia(){
+        for(int i = 0; i < length; i++){
+            int oldR = Color.red(pixels[i]);
+            int oldG = Color.green(pixels[i]);
+            int oldB = Color.blue(pixels[i]);
+            int newR = (int) (oldR*0.393 + oldG*0.769 + oldB*0.189);
+            if(newR>255)newR=255;
+            int newG = (int) (oldR*0.349 + oldG*0.686 + oldB*0.168);
+            if(newG>255)newG=255;
+            int newB = (int) (oldR*0.272 + oldG*0.534 + oldB*0.131);
+            if(newB>255)newB=255;
+            pixels[i] = Color.rgb(newR,newG,newB);
+        }
+        this.bmp.setPixels(pixels,0,width,0,0,width,height);
+    }
+
 
     /**
      * Change the color of the image with the color selected

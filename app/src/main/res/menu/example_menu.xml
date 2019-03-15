@@ -37,6 +37,9 @@
             <item android:id="@+id/colorOnly"
                 android:title="colorOnly"
                 app:showAsAction="never" ></item>
+            <item android:id="@+id/sepia"
+                android:title="Sepia"
+                app:showAsAction="never" ></item>
         </menu>
     </item>
 
