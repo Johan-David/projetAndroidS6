@@ -216,6 +216,10 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                 saveFile.SaveImage(this,currentPictureUse.getBmp());
                 return true;
 
+            case R.id.pixelisation:
+                currentPictureUse.pixelisation();
+                return true;
+
         }
         return super.onOptionsItemSelected(item);
     }

@@ -95,6 +95,9 @@
 
     </item>
 
+    <item
+        android:id="@+id/pixelisation"
+        android:title="Pixelisation" />
 
 
 </menu>

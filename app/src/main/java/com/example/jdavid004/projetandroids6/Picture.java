@@ -58,7 +58,7 @@ public class Picture  {
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inMutable = true;
         options.inScaled = false;
-        this.bmp = BitmapFactory.decodeResource(resources,R.drawable.vegetables,options);
+        this.bmp = BitmapFactory.decodeResource(resources,R.drawable.fruits,options);
         setDimensions();
         setPixels();
     }
@@ -668,5 +668,54 @@ public class Picture  {
     }
 
 
+    void pixelisation() {
+        int pourcentage = 30;
+        int length1 = width / pourcentage;
+        int[][] matrice = new int[length1][length1];
 
+        // Je parcours mon image d'un bloc de 10x10
+        for (int x = 0; x < width-length1; x += length1) {
+            for (int y = 0; y < height-length1; y += length1) {
+
+                int moyR = 0;
+                int moyG = 0;
+                int moyB = 0;
+                // Je parcours ensuite ma matrice de  taille length * length
+                for (int i = x; i < x + length1; i++) {
+                    for (int j = y; j < y + length1; j++) {
+                        //Je récupère la valeur du pixel
+                        int pixelValue = pixels[i + j * width];
+                        moyR += Color.red(pixelValue);
+                        moyG += Color.green(pixelValue);
+                        moyB += Color.blue(pixelValue);
+                    }
+                }
+
+                moyR = moyR / (length1*length1);
+                moyG = moyG / (length1*length1);
+                moyB = moyB / (length1*length1);
+
+                if(moyR > 255){
+                    moyR = 255;
+                }
+                if(moyB > 255){
+                    moyB = 255;
+                }
+                if(moyG > 255){
+                    moyG = 255;
+                }
+
+                for (int i = x; i != x + length1; i++) {
+                    for (int j = y; j != y + length1; j++) {
+                        // J'attribue la nouvelle valeur du pixel
+                        pixels[i + j * width] = Color.rgb(moyR, moyG, moyB);
+                    }
+                }
+
+            }
+        }
+
+        bmp.setPixels(pixels, 0, width, 0, 0, width, height);
+
+    }
 }
