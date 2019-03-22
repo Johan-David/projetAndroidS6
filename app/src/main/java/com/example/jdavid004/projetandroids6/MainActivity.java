@@ -143,10 +143,10 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                         matrixMoy[i][j]=1;
                     }
                 }
-                Convolution blur = new Convolution(currentPictureUse, matrixMoy, mWidthMoy, mHeightMoy, false, true);
-                //blur.compute();
-                blur.computeRS(getApplicationContext());
-                //blur.computeIntrinsicConvolve(getApplicationContext());
+                currentPictureUse.ModifyConvolutionAttributes(matrixMoy, mWidthMoy, mHeightMoy, false, true);
+                //currentPictureUse.compute();
+                //currentPictureUse.computeRS(getApplicationContext());
+                currentPictureUse.computeIntrinsicConvolve(getApplicationContext());
                 return true;
 
             case R.id.gaussien:
@@ -155,10 +155,10 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                 int [][] matrixGauss = { {1,2,1},
                                          {2,4,2},
                                          {1,2,1} };
-                Convolution gaussien = new Convolution(currentPictureUse, matrixGauss, mWidthGauss, mHeightGauss, false, true);
-                //gaussien.compute();
-                //gaussien.computeRS(getApplicationContext());
-                gaussien.computeIntrinsicGaussianBlur(getApplicationContext(), 3);
+                currentPictureUse.ModifyConvolutionAttributes(matrixGauss, mWidthGauss, mHeightGauss, false, true);
+                //currentPictureUse.compute();
+                //currentPictureUse.computeRS(getApplicationContext());
+                currentPictureUse.computeIntrinsicGaussianBlur(getApplicationContext(), 3);
                 return true;
 
             case R.id.prewitt:
@@ -167,10 +167,10 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                 int[][] matrixPrewitt = { {-1,0,1},
                                           {-1,0,1},
                                           {-1,0,1} };
-                Convolution contourPrewitt = new Convolution(currentPictureUse, matrixPrewitt, mWidthPrewitt, mHeightPrewitt,true, false);
-                //contourPrewitt.compute();
-                //contourPrewitt.computeRS(getApplicationContext());
-                contourPrewitt.computeIntrinsicConvolve(getApplicationContext());
+                currentPictureUse.ModifyConvolutionAttributes(matrixPrewitt, mWidthPrewitt, mHeightPrewitt,true, false);
+                //currentPictureUse.compute();
+                //currentPictureUse.computeRS(getApplicationContext());
+                currentPictureUse.computeIntrinsicConvolve(getApplicationContext());
                 return true;
 
             case R.id.sobel:
@@ -179,10 +179,10 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                 int[][] matrixSobel = { {-1,0,1},
                                         {-2,0,2},
                                         {-1,0,1} };
-                Convolution contourSobel= new Convolution(currentPictureUse, matrixSobel, mWidthSobel, mHeightSobel,true, false);
-                //contourSobel.compute();
-                //contourSobel.computeRS(getApplicationContext());
-                contourSobel.computeIntrinsicConvolve(getApplicationContext());
+                currentPictureUse.ModifyConvolutionAttributes(matrixSobel, mWidthSobel, mHeightSobel,true, false);
+                //currentPictureUse.compute();
+                //currentPictureUse.computeRS(getApplicationContext());
+                currentPictureUse.computeIntrinsicConvolve(getApplicationContext());
                 return true;
 
             case R.id.laplacien:
@@ -191,10 +191,10 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                 int [][] matrixLaplacien = { {0,1,0},
                                              {1,-4,1},
                                              {0,1,0} };
-                Convolution contourLaplacien = new Convolution(currentPictureUse, matrixLaplacien, mWidthLaplacien, mHeightLaplacien, false, false);
-                //contourLaplacien.compute();
-                //contourLaplacien.computeRS(getApplicationContext());
-                contourLaplacien.computeIntrinsicConvolve(getApplicationContext());
+                currentPictureUse.ModifyConvolutionAttributes(matrixLaplacien, mWidthLaplacien, mHeightLaplacien, false, false);
+                //currentPictureUse.compute();
+                //currentPictureUse.computeRS(getApplicationContext());
+                currentPictureUse.computeIntrinsicConvolve(getApplicationContext());
                 return true;
 
             case R.id.Luminosity:
