@@ -78,7 +78,7 @@ public class Picture  {
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inMutable = true;
         options.inScaled = false;
-        this.bmp = BitmapFactory.decodeResource(resources,R.drawable.contrast,options);
+        this.bmp = BitmapFactory.decodeResource(resources,R.drawable.fruits,options);
         setDimensions();
         setPixels();
     }
