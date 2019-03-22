@@ -58,7 +58,7 @@ public class Picture  {
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inMutable = true;
         options.inScaled = false;
-        this.bmp = BitmapFactory.decodeResource(resources,R.drawable.fruits,options);
+        this.bmp = BitmapFactory.decodeResource(resources,R.drawable.contrast,options);
         setDimensions();
         setPixels();
     }
@@ -347,36 +347,28 @@ public class Picture  {
             }
         }
 
-        for(int ng = 0; ng < 256; ng++){
-            int LUTvalue = (255*(ng-minRed))/(maxRed-minRed);
-            if(LUTvalue < 0){
-                LUTr[ng] = 0;
-            }else if(LUTvalue > 255){
-                LUTr[ng] = 255;
-            }else{
-                LUTr[ng] = LUTvalue;
-            }
-        }
 
-        for(int ng = 0; ng < 256; ng++){
-            int LUTvalue = (255*(ng-minGreen))/(maxGreen-minGreen);
-            if(LUTvalue < 0){
-                LUTg[ng] = 0;
-            }else if(LUTvalue > 255){
-                LUTg[ng] = 255;
-            }else{
-                LUTg[ng] = LUTvalue;
+        for(int i = 0; i < length; i++){
+            int red = Color.red(pixels[i]);
+            if(red < minRed){
+                minRed = red;
             }
-        }
-
-        for(int ng = 0; ng < 256; ng++){
-            int LUTvalue = (255*(ng-minBlue))/(maxBlue-minBlue);
-            if(LUTvalue < 0){
-                LUTb[ng] = 0;
-            }else if(LUTvalue > 255){
-                LUTb[ng] = 255;
-            }else{
-                LUTb[ng] = LUTvalue;
+            if(red > maxRed){
+                maxRed = red;
+            }
+            int green = Color.green(pixels[i]);
+            if(green < minGreen){
+                minGreen = green;
+            }
+            if(green > maxGreen){
+                maxGreen = green;
+            }
+            int blue = Color.blue(pixels[i]);
+            if(blue < minBlue){
+                minBlue = blue;
+            }
+            if(blue > maxBlue){
+                maxBlue = blue;
             }
         }
 
@@ -396,13 +388,20 @@ public class Picture  {
     /**
      * Increases the image contrast by calculating the color value of a pixel by averaging the 3 RGB ranges accumulated through the dynamic extension method
      */
-    void contrastDynamicExtensionRGBAverage(){
+   void contrastDynamicExtensionRGBAverage(int percentage, Picture copycurrentPictureUse){
         int min = 255;
         int max = 0;
+
+        int min2 = 126 - percentage;
+        int max2 =percentage + 126;
+        int[] copyPixels = new int[height * width];
+        Bitmap copyBitmap = copycurrentPictureUse.getBmp();
+        copyBitmap.getPixels(copyPixels,0,width,0,0,width,height);
         int[] LUT = new int[256];
 
+
         for(int i = 0; i < length; i++){
-            int average = (Color.red(pixels[i])+Color.green(pixels[i])+Color.blue(pixels[i])) / 3;
+            int average = (Color.red(copyPixels[i])+Color.green(copyPixels[i])+Color.blue(copyPixels[i])) / 3;
             if(average < min){
                 min = average;
             }
@@ -412,7 +411,9 @@ public class Picture  {
         }
 
         for(int ng = 0; ng < 256; ng++){
-            int LUTvalue = (255*(ng-min))/(max-min);
+            int LUTvalue = ( (max2 - min2) * (ng - min))/(max-min) + min2;
+            Log.i("lut", "Min2 = " + min2 + " | " + "Max2 = " + max2);
+            Log.i("lut", "LUTValue = " + LUTvalue);
             if(LUTvalue < 0){
                 LUT[ng] = 0;
             }else if(LUTvalue > 255){
@@ -423,16 +424,16 @@ public class Picture  {
         }
 
         for(int i=0;i<length;i++){
-            int red = Color.red(pixels[i]);
-            int green = Color.green(pixels[i]);
-            int blue = Color.blue(pixels[i]);
+            int red = Color.red(copyPixels[i]);
+            int green = Color.green(copyPixels[i]);
+            int blue = Color.blue(copyPixels[i]);
             int newRed = LUT[red];
             int newGreen = LUT[green];
             int newBlue = LUT[blue];
-            pixels[i] = Color.rgb(newRed,newGreen,newBlue);
+            copyPixels[i] = Color.rgb(newRed,newGreen,newBlue);
         }
 
-        bmp.setPixels(pixels,0,width,0,0,width,height);
+        bmp.setPixels(copyPixels,0,width,0,0,width,height);
     }
 
 
