@@ -685,53 +685,96 @@ public class Picture  {
 
 
     void pixelisation() {
-        int pourcentage = 30;
-        int length1 = width / pourcentage;
-        int[][] matrice = new int[length1][length1];
+        int pourcentage = 90;
+        int lengthMatrice = width / pourcentage;
 
         // Je parcours mon image d'un bloc de 10x10
-        for (int x = 0; x < width-length1; x += length1) {
-            for (int y = 0; y < height-length1; y += length1) {
+        for (int x = 0; x < width; x += lengthMatrice) {
+            for (int y = 0; y < height  ; y += lengthMatrice) {
 
                 int moyR = 0;
                 int moyG = 0;
                 int moyB = 0;
-                // Je parcours ensuite ma matrice de  taille length * length
-                for (int i = x; i < x + length1; i++) {
-                    for (int j = y; j < y + length1; j++) {
-                        //Je récupère la valeur du pixel
-                        int pixelValue = pixels[i + j * width];
-                        moyR += Color.red(pixelValue);
-                        moyG += Color.green(pixelValue);
-                        moyB += Color.blue(pixelValue);
+                // Cas des bords à droite
+                if (x + lengthMatrice > width) {
+                    int newX = width - x;
+                    for (int i = lengthMatrice - newX; i < lengthMatrice; i++) { // On remplis en noir les case de la matrice qui ne sont pas dans l'image pour pour déterminer la valeur du pixel
+                        for (int j = y; j < y + lengthMatrice; j++) {
+                            moyR += Color.red(0);
+                            moyG += Color.green(0);
+                            moyB += Color.blue(0);
+                        }
+                    }
+
+                    for (int i = x; i < width; i++) {
+                        for (int j = y; j < y + lengthMatrice; j++) {
+                            int pixelValue = pixels[i + j * width];
+                            moyR += Color.red(pixelValue);
+                            moyG += Color.green(pixelValue);
+                            moyB += Color.blue(pixelValue);
+                        }
+
+
+                    }
+                    Log.i("PIXELISATION", "On est dans la boucle du x");
+                    //Cas des bords en bas de l'image
+                }else if(y + lengthMatrice > height){
+                    int newY = height - y;
+                    for (int i = x; i < x + lengthMatrice; i++) { // On remplis en noir les case de la matrice qui ne sont pas dans l'image pour pour déterminer la valeur du pixel
+                        for (int j = lengthMatrice - newY; j < lengthMatrice; j++) {
+                            moyR += Color.red(0);
+                            moyG += Color.green(0);
+                            moyB += Color.blue(0);
+                        }
+                    }
+
+                    for (int i = x; i < x + lengthMatrice; i++) {
+                        for (int j = y; j < height ; j++) {
+                            int pixelValue = pixels[i + j * width];
+                            moyR += Color.red(pixelValue);
+                            moyG += Color.green(pixelValue);
+                            moyB += Color.blue(pixelValue);
+                        }
+
+
+                    }
+                    Log.i("PIXELISATION", "On est dans la boucle du y");
+                }else{
+                    // Je parcours ensuite ma matrice de  taille length * length
+                    for (int i = x; i < x + lengthMatrice; i++) {
+                        for (int j = y; j < y + lengthMatrice; j++) {
+                            Log.i("PIXELISATION", "On est dans la boucle normal");
+                            int pixelValue = pixels[i + j * width];
+                            moyR += Color.red(pixelValue);
+                            moyG += Color.green(pixelValue);
+                            moyB += Color.blue(pixelValue);
+                        }
                     }
                 }
 
-                moyR = moyR / (length1*length1);
-                moyG = moyG / (length1*length1);
-                moyB = moyB / (length1*length1);
+                moyR = moyR / (lengthMatrice * lengthMatrice);
+                moyG = moyG / (lengthMatrice * lengthMatrice);
+                moyB = moyB / (lengthMatrice * lengthMatrice);
 
-                if(moyR > 255){
+                /*if (moyR > 255) {
                     moyR = 255;
                 }
-                if(moyB > 255){
+                if (moyB > 255) {
                     moyB = 255;
                 }
-                if(moyG > 255){
+                if (moyG > 255) {
                     moyG = 255;
-                }
+                }*/
 
-                for (int i = x; i != x + length1; i++) {
-                    for (int j = y; j != y + length1; j++) {
+                for (int i = x; i != x + lengthMatrice; i++) {
+                    for (int j = y; j != y + lengthMatrice; j++) {
                         // J'attribue la nouvelle valeur du pixel
                         pixels[i + j * width] = Color.rgb(moyR, moyG, moyB);
                     }
                 }
-
             }
         }
 
         bmp.setPixels(pixels, 0, width, 0, 0, width, height);
-
     }
 }
