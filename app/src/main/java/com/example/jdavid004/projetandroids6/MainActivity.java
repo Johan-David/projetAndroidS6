@@ -44,25 +44,22 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
     private int mDefaultColor = 0;
     private int colorPickerOption = 0;
 
-    private SeekBar seekBarContrast;
     private ZoomageView imageView;      //View of the image of type ZoomageView which extends type ImageView
     private Picture originalPictureUse; //The original picture we are using
     private Picture currentPictureUse;  //The current picture we are using
     private Picture copycurrentPictureUse;  //A copy of the current picture we are using
     private SeekBar seekbarlum;         //cursor bar to modify luminosity
     private TextView textLumi;          //Text indication for luminosity
+    private SeekBar seekBarContrast;    //cursor bar to modify contrast
     private String currentPhotoPath;
     private static final int GALLERY_REQUEST = 1314;
     private static final int REQUEST_TAKE_PHOTO = 1;
     private int STORAGE_PERMISSION_CODE = 1;
 
-    /* seekbar maccro */
-
+    /* seekbar macro */
     private int SEEKBAR_OPTION_NULL = 0;
     private int SEEKBAR_OPTION_LUMINOSITY = 1;
     private int SEEKBAR_OPTION_CONTRAST_DYN = 2; //contrastDynamicExten
-
-
     private int seekBarOption = 0;
 
     @Override
@@ -78,7 +75,7 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
         seekbarlum = (SeekBar)findViewById(R.id.seekbarlum);
         seekbarlum.setVisibility(View.GONE);
         seekbarlum.setOnSeekBarChangeListener(this);
-        seekbarlum.setMax(300);
+        seekbarlum.setMax(200);
 
         textLumi = (TextView) findViewById(R.id.textLumi);
         textLumi.setVisibility(View.GONE);
@@ -86,8 +83,7 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
         seekBarContrast = (SeekBar)findViewById(R.id.seekBarContrast);
         seekBarContrast.setVisibility(View.GONE);
         seekBarContrast.setOnSeekBarChangeListener(this);
-        seekBarContrast.setMin(10);
-        seekBarContrast.setMax(126);
+        seekBarContrast.setMax(200);
 
         mDefaultColor = ContextCompat.getColor(MainActivity.this, R.color.colorPrimary);
     }
@@ -152,7 +148,7 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
 
             case R.id.contrastDynamicExten:
                 seekBarOption = SEEKBAR_OPTION_CONTRAST_DYN;
-                seekBarContrast.setProgress(63);
+                seekBarContrast.setProgress(100);
                 seekBarContrast.setVisibility(View.VISIBLE);
                 copycurrentPictureUse = new Picture(currentPictureUse.getBmp());
 
@@ -448,11 +444,11 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
     public void onStopTrackingTouch(SeekBar seekBar) {
         if(seekBarOption == SEEKBAR_OPTION_LUMINOSITY){
             //currentPictureUse.AdjustLuminosity(seekBar.getProgress(),copycurrentPictureUse);
-            currentPictureUse.AdjustLuminosityRS(getApplicationContext(),seekBar.getProgress(),copycurrentPictureUse);
+            currentPictureUse.AdjustLuminosityRS(getApplicationContext(),seekBar.getProgress()+25,copycurrentPictureUse);
         }
 
         if(seekBarOption == SEEKBAR_OPTION_CONTRAST_DYN){
-            currentPictureUse.contrastDynamicExtensionRGBAverage(seekBar.getProgress() , copycurrentPictureUse);
+            currentPictureUse.contrastDynamicExtensionRGBAverage(seekBar.getProgress()+10, copycurrentPictureUse);
             //currentPictureUse.contrastDynamicExtensionRS(getApplicationContext());
         }
 
