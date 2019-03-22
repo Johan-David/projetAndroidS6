@@ -777,18 +777,8 @@ public class Picture  {
                 moyG = moyG / (lengthMatrice * lengthMatrice);
                 moyB = moyB / (lengthMatrice * lengthMatrice);
 
-                /*if (moyR > 255) {
-                    moyR = 255;
-                }
-                if (moyB > 255) {
-                    moyB = 255;
-                }
-                if (moyG > 255) {
-                    moyG = 255;
-                }*/
-
-                for (int i = x; i != x + lengthMatrice; i++) {
-                    for (int j = y; j != y + lengthMatrice; j++) {
+                for (int i = x; i < x + lengthMatrice; i++) {
+                    for (int j = y; j < y + lengthMatrice; j++) {
                         // J'attribue la nouvelle valeur du pixel
                         pixels[i + j * width] = Color.rgb(moyR, moyG, moyB);
                     }
