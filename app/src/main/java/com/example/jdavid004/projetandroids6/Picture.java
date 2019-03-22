@@ -143,6 +143,9 @@ public class Picture  {
         greyScript.destroy(); rs.destroy();
     }
 
+    /**
+     * Set the bitmap with a sepia color
+     */
     void sepia(){
         for(int i = 0; i < length; i++){
             int oldR = Color.red(pixels[i]);
@@ -154,6 +157,46 @@ public class Picture  {
             if(newG>255)newG=255;
             int newB = (int) (oldR*0.272 + oldG*0.534 + oldB*0.131);
             if(newB>255)newB=255;
+            pixels[i] = Color.rgb(newR,newG,newB);
+        }
+        this.bmp.setPixels(pixels,0,width,0,0,width,height);
+    }
+
+    void sepiaRS(Context context){
+        RenderScript rs = RenderScript.create(context);
+
+        Allocation input = Allocation.createFromBitmap(rs,bmp);
+        Allocation output = Allocation.createTyped(rs,input.getType());
+
+        ScriptC_sepia sepiaScript = new ScriptC_sepia(rs);
+
+        sepiaScript.forEach_sepia(input,output);
+
+        output.copyTo(bmp);
+
+        input.destroy(); output.destroy();
+        sepiaScript.destroy(); rs.destroy();
+    }
+
+    void thresholding(){
+        int seuil=125;
+        int newR, newG, newB;
+        for(int i = 0; i < length; i++){
+            int R = Color.red(pixels[i]);
+            if(R<seuil)
+                newR=0;
+            else
+                newR=255;
+            int G = Color.green(pixels[i]);
+            if(G<seuil)
+                newG=0;
+            else
+                newG=255;
+            int B = Color.blue(pixels[i]);
+            if(B<seuil)
+                newB=0;
+            else
+                newB=255;
             pixels[i] = Color.rgb(newR,newG,newB);
         }
         this.bmp.setPixels(pixels,0,width,0,0,width,height);

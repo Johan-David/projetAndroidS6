@@ -40,6 +40,9 @@
             <item android:id="@+id/sepia"
                 android:title="Sepia"
                 app:showAsAction="never" ></item>
+            <item android:id="@+id/thresholding"
+                android:title="Seuillage"
+                app:showAsAction="never" ></item>
         </menu>
     </item>
 
