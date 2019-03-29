@@ -651,7 +651,8 @@ public class Picture  {
         //Applying the new values to pixels
         for(int i = 0; i < length; i++){
             int grey = Color.red(pixels[i]);
-            int newGrey = (255*H[grey]) / pixels.length;
+            long tmp = (255*H[grey]);
+            int newGrey = (int)(tmp / pixels.length);
             pixels[i] = Color.rgb(newGrey,newGrey,newGrey);
         }
 
@@ -686,11 +687,14 @@ public class Picture  {
         //Applying the new values to pixels
         for(int i = 0; i < length; i++){
             int red = Color.red(pixels[i]);
-            int newRed = (255*Hr[red])/length;
+            long tmpRed = (255*Hr[red]);
+            int newRed = (int)(tmpRed)/length;
             int green = Color.green(pixels[i]);
-            int newGreen = (255*Hg[green]) / length;
+            long tmpGreen = (255*Hg[green]);
+            int newGreen = (int)(tmpGreen) / length;
             int blue = Color.blue(pixels[i]);
-            int newBlue = (255*Hb[blue]) / length;
+            long tmpBlue = (255*Hb[blue]);
+            int newBlue = (int)(tmpBlue) / length;
             pixels[i] = Color.rgb(newRed,newGreen,newBlue);
         }
 
@@ -717,11 +721,14 @@ public class Picture  {
         //Applying the new values to pixels
         for(int i=0; i < length; i++){
             int red = Color.red(pixels[i]);
-            int newRed = (255*H[red])/length;
+            long tmpRed = (255*H[red]);
+            int newRed = (int)(tmpRed)/length;
             int green = Color.green(pixels[i]);
-            int newGreen = (255*H[green])/length;
+            long tmpGreen = (255*H[green]);
+            int newGreen = (int)(tmpGreen) / length;
             int blue = Color.blue(pixels[i]);
-            int newBlue = (255*H[blue])/length;
+            long tmpBlue = (255*H[blue]);
+            int newBlue = (int)(tmpBlue) / length;
             pixels[i] = Color.rgb(newRed,newGreen,newBlue);
         }
 
@@ -1033,7 +1040,7 @@ public class Picture  {
             }
         }
 
-        if(secondApplyWithMatrixTranslation){
+        if(secondApplyWithMatrixTranslation){   //normalisation for contour
             for(int y = 0; y < height - this.m_height+1; y++) {                   //Run through the image from left to right, downhill
                 for (int x = 0; x < width - this.m_width + 1; x++) {
                     int index_center = ((x + (this.m_width / 2)) + (y + (this.m_height / 2)) * width);   //pixel's index in the center of the matrix
@@ -1183,8 +1190,8 @@ public class Picture  {
 
                 convolution3x3Script.forEach(outAllocation);
             }
-
             convolution3x3Script.destroy();
+
         }else{
             final ScriptIntrinsicConvolve5x5 convolution5x5Script = ScriptIntrinsicConvolve5x5.create(rs, Element.U8_4(rs));
 
@@ -1199,6 +1206,19 @@ public class Picture  {
                     });
 
             convolution5x5Script.forEach(outAllocation);
+
+            if(secondApplyWithMatrixTranslation){
+                convolution5x5Script.setCoefficients(new float[]
+                        {
+                                (float)matrix[0][0]/factor,(float)matrix[1][0]/factor,(float)matrix[2][0]/factor,(float)matrix[3][0]/factor,(float)matrix[4][0]/factor,
+                                (float)matrix[0][1]/factor,(float)matrix[1][1]/factor,(float)matrix[2][1]/factor,(float)matrix[3][1]/factor,(float)matrix[4][1]/factor,
+                                (float)matrix[0][2]/factor,(float)matrix[1][2]/factor,(float)matrix[2][2]/factor,(float)matrix[3][2]/factor,(float)matrix[4][2]/factor,
+                                (float)matrix[0][3]/factor,(float)matrix[1][3]/factor,(float)matrix[2][3]/factor,(float)matrix[3][3]/factor,(float)matrix[4][3]/factor,
+                                (float)matrix[0][4]/factor,(float)matrix[1][4]/factor,(float)matrix[2][4]/factor,(float)matrix[3][4]/factor,(float)matrix[4][4]/factor
+                        });
+
+                convolution5x5Script.forEach(outAllocation);
+            }
 
             convolution5x5Script.destroy();
         }
