@@ -143,7 +143,13 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                 return true;
 
             case R.id.thresholding:
-                currentPictureUse.thresholding();
+                //currentPictureUse.thresholding();
+                currentPictureUse.thresholdingRS(getApplicationContext());
+                return true;
+
+            case R.id.invert:
+                //currentPictureUse.invert();
+                currentPictureUse.invertRS(getApplicationContext());
                 return true;
 
             case R.id.contrastDynamicExten:

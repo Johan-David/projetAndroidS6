@@ -43,6 +43,10 @@
             <item android:id="@+id/thresholding"
                 android:title="Seuillage"
                 app:showAsAction="never" ></item>
+            <item android:id="@+id/invert"
+                android:title="Négatif"
+                app:showAsAction="never" ></item>
+
         </menu>
     </item>
 

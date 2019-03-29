@@ -65,8 +65,8 @@ public class Picture  {
      */
     Picture(Bitmap bmp){
         this.bmp = bmp.copy(bmp.getConfig(),true);
-        setDimensions();
-        setPixels();
+        initDimensions();
+        initPixels();
     }
 
 
@@ -79,8 +79,8 @@ public class Picture  {
         options.inMutable = true;
         options.inScaled = false;
         this.bmp = BitmapFactory.decodeResource(resources,R.drawable.fruits,options);
-        setDimensions();
-        setPixels();
+        initDimensions();
+        initPixels();
     }
 
     /* Getter & Setter */
@@ -96,13 +96,21 @@ public class Picture  {
         return height;
     }
 
-    void setPixels(){
+    public int[] getPixels() {
+        int[] res = new int[length];
+        for(int i=0;i<length;i++){
+            res[i]=pixels[i];
+        }
+        return res;
+    }
+
+    void initPixels(){
         this.pixels = new int[width*height];
         this.bmp.getPixels(pixels,0,width,0,0,width,height);
         this.length = pixels.length;
     }
 
-    void setDimensions(){
+    void initDimensions(){
         this.width = bmp.getWidth();
         this.height = bmp.getHeight();
     }
@@ -178,6 +186,32 @@ public class Picture  {
         sepiaScript.destroy(); rs.destroy();
     }
 
+    void invert(){
+        for(int i = 0; i < length; i++){
+            int R = 255-Color.red(pixels[i]);
+            int G = 255-Color.green(pixels[i]);
+            int B = 255-Color.blue(pixels[i]);
+            pixels[i] = Color.rgb(R,G,B);
+        }
+        this.bmp.setPixels(pixels,0,width,0,0,width,height);
+    }
+
+    void invertRS(Context context){
+        RenderScript rs = RenderScript.create(context);
+
+        Allocation input = Allocation.createFromBitmap(rs,bmp);
+        Allocation output = Allocation.createTyped(rs,input.getType());
+
+        ScriptC_invert invertScript = new ScriptC_invert(rs);
+
+        invertScript.forEach_invert(input,output);
+
+        output.copyTo(bmp);
+
+        input.destroy(); output.destroy();
+        invertScript.destroy(); rs.destroy();
+    }
+
     void thresholding(){
         int seuil=125;
         int newR, newG, newB;
@@ -200,6 +234,49 @@ public class Picture  {
             pixels[i] = Color.rgb(newR,newG,newB);
         }
         this.bmp.setPixels(pixels,0,width,0,0,width,height);
+    }
+
+    void thresholdingRS(Context context){
+        RenderScript rs = RenderScript.create(context);
+
+        Allocation input = Allocation.createFromBitmap(rs,bmp);
+        Allocation output = Allocation.createTyped(rs,input.getType());
+
+        ScriptC_thresholding thresholdingScript = new ScriptC_thresholding(rs);
+
+        thresholdingScript.forEach_thresholding(input,output);
+
+        output.copyTo(bmp);
+
+        input.destroy(); output.destroy();
+        thresholdingScript.destroy(); rs.destroy();
+    }
+
+    void drawing(Context context){
+        Picture blur_picture = new Picture(this.getBmp());
+        blur_picture.toGreyRS(context);
+        int[] pixels_grey = blur_picture.getPixels();
+        blur_picture.invertRS(context);
+        blur_picture.computeIntrinsicGaussianBlur(context, 3);
+        int[] pixels_blurred = blur_picture.getPixels();
+        int[] pixels_res = dodge(pixels_blurred, pixels_grey);
+        this.bmp.setPixels(pixels_res,0,width,0,0,width,height);
+
+    }
+
+    int[] dodge(int[] front, int[] back){
+        int[] res = new int[length];
+        for(int i = 0; i < length; i++){
+            int grey;
+            if(Color.red(back[i])==255){
+                grey=255;
+            }else{
+                grey=Color.red(front[i])*255/(255-Color.red(back[i]));
+                if(Color.red(res[i])>255)grey=255;
+            }
+            res[i] = Color.rgb(grey,grey,grey);
+        }
+        return res;
     }
 
 
