@@ -23,11 +23,14 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -44,7 +47,8 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
     private int mDefaultColor = 0;
     private int colorPickerOption = 0;
 
-    private ZoomageView imageView;      //View of the image of type ZoomageView which extends type ImageView
+    private ZoomageView imageViewCentral;      //View of the image of type ZoomageView which extends type ImageView
+    private Preview[] tablePreview;         //Table of the différent Imageview used to the different previews
     private Picture originalPictureUse; //The original picture we are using
     private Picture currentPictureUse;  //The current picture we are using
     private Picture copycurrentPictureUse;  //A copy of the current picture we are using
@@ -52,9 +56,11 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
     private TextView textLumi;          //Text indication for luminosity
     private SeekBar seekBarContrast;    //cursor bar to modify contrast
     private String currentPhotoPath;
+    private int previewId;
     private static final int GALLERY_REQUEST = 1314;
     private static final int REQUEST_TAKE_PHOTO = 1;
     private int STORAGE_PERMISSION_CODE = 1;
+    private static final int NB_PICTURE_PREVIEW = 5;
 
     /* seekbar macro */
     private int SEEKBAR_OPTION_NULL = 0;
@@ -67,10 +73,10 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        imageView = findViewById(R.id.vegetables);
+        imageViewCentral = findViewById(R.id.vegetables);
         originalPictureUse = new Picture(getResources());
         currentPictureUse = new Picture(originalPictureUse.getBmp());
-        imageView.setImageBitmap(currentPictureUse.getBmp());
+        imageViewCentral.setImageBitmap(currentPictureUse.getBmp());
 
         seekbarlum = (SeekBar)findViewById(R.id.seekbarlum);
         seekbarlum.setVisibility(View.GONE);
@@ -86,6 +92,8 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
         seekBarContrast.setMax(200);
 
         mDefaultColor = ContextCompat.getColor(MainActivity.this, R.color.colorPrimary);
+
+        initialisePreview();
     }
 
     @Override
@@ -119,7 +127,7 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
             // click on the arrow to cancel effects
             case R.id.reset:
                 currentPictureUse = new Picture(originalPictureUse.getBmp());
-                imageView.setImageBitmap(currentPictureUse.getBmp()); // On oublie pas de réafficher l'image
+                imageViewCentral.setImageBitmap(currentPictureUse.getBmp()); // On oublie pas de réafficher l'image
                 return true;
 
             case R.id.toGrey:
@@ -279,7 +287,7 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                     if(imageBitmap != null){
                         originalPictureUse = new Picture(imageBitmap);
                         currentPictureUse = new Picture(imageBitmap);
-                        imageView.setImageBitmap(currentPictureUse.getBmp());
+                        imageViewCentral.setImageBitmap(currentPictureUse.getBmp());
                     }
                 }
                 break;
@@ -367,7 +375,7 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
             }
             currentPictureUse = new Picture(bmp);
             originalPictureUse = new Picture(bmp);
-            imageView.setImageBitmap(currentPictureUse.getBmp());
+            imageViewCentral.setImageBitmap(currentPictureUse.getBmp());
         }
     }
 
@@ -459,6 +467,101 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
         }
 
 
+    }
+
+    /**
+     * Initialize the different previews at the bottom of the application.
+     */
+    private void initialisePreview() {
+        this.tablePreview = new Preview[NB_PICTURE_PREVIEW]; // We initialize the array witch stock the differents ImageView for the preview
+
+        Bitmap original = originalPictureUse.getBmp(); // We resize the bitmap in a small bitmap because the traitment need to be fast
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        original.compress(Bitmap.CompressFormat.JPEG, 0, out);
+        Bitmap decoded = BitmapFactory.decodeStream(new ByteArrayInputStream(out.toByteArray()));
+
+        for (int i = 0; i < NB_PICTURE_PREVIEW; i++) {
+            Picture picturePreview = new Picture(decoded);
+            final String namePreview = "preview" + i;
+            this.previewId = getResources().getIdentifier(namePreview, "id", getPackageName());
+            ImageView view = findViewById(previewId);
+            switch (i) {
+                case 0: // first preview use the function toGreyRS
+                    picturePreview.toGreyRS(getApplicationContext());
+                    view.setImageBitmap(picturePreview.getBmp());
+                    tablePreview[i] = new Preview(view,Treatment.TOGREY);
+                    break;
+                case 1: // second preview use the function sepiaRS
+                    picturePreview.sepiaRS(getApplicationContext());
+                    view.setImageBitmap(picturePreview.getBmp());
+                    tablePreview[i] = new Preview(view,Treatment.SEPIA);
+                    break;
+                case 2: //third preview use the function pixelisation
+                    picturePreview.pixelisation();
+                    view.setImageBitmap(picturePreview.getBmp());
+                    tablePreview[i] = new Preview(view,Treatment.PIXELISATION);
+                    break;
+                case 3: // fourth preview use the convolution with a average filter
+                    int mWidthMoy = 3;
+                    int mHeightMoy = mWidthMoy;
+                    int[][] matrixMoy = new int[mWidthMoy][mHeightMoy];
+                    for (int k = 0; k < mWidthMoy; k++) {
+                        for (int j = 0; j < mHeightMoy; j++) {
+                            matrixMoy[k][j] = 1;
+                        }
+                    }
+                    picturePreview.ModifyConvolutionAttributes(matrixMoy, mWidthMoy, mHeightMoy, false, true);
+                    picturePreview.computeIntrinsicConvolve(getApplicationContext());
+                    picturePreview.computeIntrinsicConvolve(getApplicationContext());
+                    picturePreview.computeIntrinsicConvolve(getApplicationContext());
+                    picturePreview.computeIntrinsicConvolve(getApplicationContext());
+                    picturePreview.computeIntrinsicConvolve(getApplicationContext());
+                    view.setImageBitmap(picturePreview.getBmp());
+                    tablePreview[i] = new Preview(view,Treatment.BLUR);
+                    break;
+                case 4: // fifth preview use the thresholding function.
+                    picturePreview.thresholdingRS(getApplicationContext());
+                    view.setImageBitmap(picturePreview.getBmp());
+                    tablePreview[i] = new Preview(view,Treatment.THRESHOLDING);
+                    break;
+            }
+            this.tablePreview[i].getImagePreview().setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    for(int j = 0; j < NB_PICTURE_PREVIEW ; j++){
+                        if(view == tablePreview[j].getImagePreview()){
+                            switch (tablePreview[j].getTreatmentUse()){
+                                case TOGREY:
+                                    currentPictureUse.toGreyRS(getApplicationContext());
+                                    break;
+                                case SEPIA:
+                                    currentPictureUse.sepiaRS(getApplicationContext());
+                                    break;
+                                case PIXELISATION:
+                                    currentPictureUse.pixelisation();
+                                    break;
+                                case THRESHOLDING:
+                                    currentPictureUse.thresholdingRS(getApplicationContext());
+                                    break;
+                                case BLUR:
+                                    int mWidthMoy = 5;
+                                    int mHeightMoy = mWidthMoy;
+                                    int[][] matrixMoy = new int[mWidthMoy][mHeightMoy];
+                                    for (int k = 0; k < mWidthMoy; k++) {
+                                        for (int l = 0; l < mHeightMoy; l++) {
+                                            matrixMoy[k][l] = 1;
+                                        }
+                                    }
+                                    currentPictureUse.ModifyConvolutionAttributes(matrixMoy, mWidthMoy, mHeightMoy, false, true);
+                                    currentPictureUse.computeIntrinsicConvolve(getApplicationContext());
+                                    break;
+                            }
+                        }
+                    }
+                    Log.i("TOUCHEVENT", " On a touché : " + namePreview);
+                }
+            });
+        }
     }
 
 }

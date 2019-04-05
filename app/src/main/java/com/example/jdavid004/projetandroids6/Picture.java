@@ -146,6 +146,7 @@ public class Picture  {
         greyScript.forEach_toGrey(input,output);
 
         output.copyTo(bmp);
+        this.bmp.getPixels(pixels,0,width,0,0,width,height);
 
         input.destroy(); output.destroy();
         greyScript.destroy(); rs.destroy();
@@ -181,6 +182,7 @@ public class Picture  {
         sepiaScript.forEach_sepia(input,output);
 
         output.copyTo(bmp);
+        this.bmp.getPixels(pixels,0,width,0,0,width,height);
 
         input.destroy(); output.destroy();
         sepiaScript.destroy(); rs.destroy();
@@ -207,6 +209,7 @@ public class Picture  {
         invertScript.forEach_invert(input,output);
 
         output.copyTo(bmp);
+        this.bmp.getPixels(pixels,0,width,0,0,width,height);
 
         input.destroy(); output.destroy();
         invertScript.destroy(); rs.destroy();
@@ -247,6 +250,7 @@ public class Picture  {
         thresholdingScript.forEach_thresholding(input,output);
 
         output.copyTo(bmp);
+        this.bmp.getPixels(pixels,0,width,0,0,width,height);
 
         input.destroy(); output.destroy();
         thresholdingScript.destroy(); rs.destroy();
@@ -318,6 +322,7 @@ public class Picture  {
         colorizeScript.forEach_colorize(input,output);
 
         output.copyTo(bmp);
+        this.bmp.getPixels(pixels,0,width,0,0,width,height);
 
         input.destroy(); output.destroy();
         colorizeScript.destroy(); rs.destroy();
@@ -405,6 +410,7 @@ public class Picture  {
         color_only_HSVScript.forEach_color_only_hsv(input,output);
 
         output.copyTo(bmp);
+        this.bmp.getPixels(pixels,0,width,0,0,width,height);
 
         input.destroy(); output.destroy();
         color_only_HSVScript.destroy(); rs.destroy();
@@ -622,6 +628,7 @@ public class Picture  {
         test.forEach_transformation(allocationB, allocationA);
         //Copy script result into bitmap
         allocationA.copyTo(bmp);
+        this.bmp.getPixels(pixels,0,width,0,0,width,height);
 
         //Destroy everything to free memory
         allocationA.destroy();
@@ -771,6 +778,7 @@ public class Picture  {
 
         //Copy script result into bitmap
         allocationA.copyTo(bmp);
+        this.bmp.getPixels(pixels,0,width,0,0,width,height);
 
         //Destroy everything to free memory
         allocationA.destroy();
@@ -825,6 +833,7 @@ public class Picture  {
             AdjustLuminosityHSVScript.forEach_AdjustLuminosityHSV(input,output);
 
             output.copyTo(bmp);
+            this.bmp.getPixels(pixels,0,width,0,0,width,height);
 
             input.destroy(); output.destroy();
             AdjustLuminosityHSVScript.destroy(); rs.destroy();
@@ -864,7 +873,6 @@ public class Picture  {
 
 
                     }
-                    Log.i("PIXELISATION", "On est dans la boucle du x");
                     //Cas des bords en bas de l'image
                 }else if(y + lengthMatrice > height){
                     int newY = height - y;
@@ -915,6 +923,17 @@ public class Picture  {
 
         bmp.setPixels(pixels, 0, width, 0, 0, width, height);
     }
+
+
+
+
+
+
+
+
+
+
+
 
     /**
      * Change the attributes used for a convolution
@@ -1122,6 +1141,7 @@ public class Picture  {
         }
 
         outAllocation.copyTo(bmp);
+        this.bmp.getPixels(pixels,0,width,0,0,width,height);
 
         inAllocation.destroy(); outAllocation.destroy(); mat.destroy();
         convolutionScript.destroy(); rs.destroy();
@@ -1146,6 +1166,7 @@ public class Picture  {
         blurScript.forEach(outAllocation);
 
         outAllocation.copyTo(bmp);
+        this.bmp.getPixels(pixels,0,width,0,0,width,height);
 
         blurScript.destroy();
         inAllocation.destroy(); outAllocation.destroy(); rs.destroy();
@@ -1224,6 +1245,7 @@ public class Picture  {
         }
 
         outAllocation.copyTo(bmp);
+        this.bmp.getPixels(pixels,0,width,0,0,width,height);
 
         inAllocation.destroy(); outAllocation.destroy(); rs.destroy();
     }
