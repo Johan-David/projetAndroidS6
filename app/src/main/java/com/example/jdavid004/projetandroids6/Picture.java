@@ -78,7 +78,7 @@ public class Picture  {
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inMutable = true;
         options.inScaled = false;
-        this.bmp = BitmapFactory.decodeResource(resources,R.drawable.fruits,options);
+        this.bmp = BitmapFactory.decodeResource(resources,R.drawable.paysage,options);
         initDimensions();
         initPixels();
     }
@@ -1248,5 +1248,100 @@ public class Picture  {
         this.bmp.getPixels(pixels,0,width,0,0,width,height);
 
         inAllocation.destroy(); outAllocation.destroy(); rs.destroy();
+    }
+
+
+    /* https://www.geeksforgeeks.org/java-program-for-quicksort/ */
+
+    int partition(int arr[], int low, int high)
+    {
+        int pivot = arr[high];
+        int i = (low-1); // index of smaller element
+        for (int j=low; j<high; j++)
+        {
+            // If current element is smaller than or
+            // equal to pivot
+            if (arr[j] <= pivot)
+            {
+                i++;
+
+                // swap arr[i] and arr[j]
+                int temp = arr[i];
+                arr[i] = arr[j];
+                arr[j] = temp;
+            }
+        }
+
+        // swap arr[i+1] and arr[high] (or pivot)
+        int temp = arr[i+1];
+        arr[i+1] = arr[high];
+        arr[high] = temp;
+
+        return i+1;
+    }
+
+
+    /* The main function that implements QuickSort()
+      arr[] --> Array to be sorted,
+      low  --> Starting index,
+      high  --> Ending index */
+    void sort(int arr[], int low, int high)
+    {
+        if (low < high)
+        {
+            /* pi is partitioning index, arr[pi] is
+              now at right place */
+            int pi = partition(arr, low, high);
+
+            // Recursively sort elements before
+            // partition and after partition
+            sort(arr, low, pi-1);
+            sort(arr, pi+1, high);
+        }
+    }
+
+    int getMedianValue(int matrice[], int r){
+        int redTab[] = new int[r*r];
+        int greenTab[] = new int[r*r];
+        int blueTab[] = new int[r*r];
+
+        for(int i = 0; i < r*r; i++){
+            redTab[i] = Color.red(matrice[i]);
+            greenTab[i] = Color.green(matrice[i]);
+            blueTab[i] = Color.blue(matrice[i]);
+        }
+
+
+
+        sort(redTab, 0, redTab.length - 1);
+
+        sort(greenTab, 0, greenTab.length - 1);
+        sort(blueTab, 0,  blueTab.length - 1);
+
+        int mid = (r*r) /  2;
+        return Color.rgb(redTab[mid], greenTab[mid], blueTab[mid]);
+    }
+
+    void median(){
+        int r = 17;
+        int[] pixelsCopie = new int[this.height * this.width];
+        int matrice[] = new int[r*r];
+        int start =  r / 2;
+        for(int y = start; y < this.height - start ; y++){                  
+            for(int x = start; x < this.width- start ; x++) {
+                int indMatrice = 0;
+                for (int i = x - start; i <= x + start; i++) {
+                    for (int j = y - start; j <= y + start; j++) {
+
+                        int indice = i + j * this.width;
+                        matrice[indMatrice] = this.pixels[indice];
+                        indMatrice ++;
+                    }
+                }
+                pixelsCopie[x + y * this.width] = getMedianValue(matrice, r);
+            }
+        }
+        this.bmp.setPixels(pixelsCopie,0,width,0,0,width,height);
+
     }
 }

@@ -109,5 +109,10 @@
         android:id="@+id/pixelisation"
         android:title="Pixelisation" />
 
+    <item
+        android:id="@+id/median"
+        android:title="Median" />
+
+
 
 </menu>
