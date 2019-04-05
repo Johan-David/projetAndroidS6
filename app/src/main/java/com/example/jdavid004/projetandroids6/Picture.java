@@ -16,6 +16,7 @@ import android.util.Log;
 import com.android.rssample.ScriptC_dynExtension;
 
 
+
 /**
  * It represents all the different treatments that an image can receive. A picture translate into a Bitmap and it dimensions.
  * @author Benjamin Darmet, Amandine Chauveau, Remi Barbosa, Johan David
@@ -78,7 +79,7 @@ public class Picture  {
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inMutable = true;
         options.inScaled = false;
-        this.bmp = BitmapFactory.decodeResource(resources,R.drawable.paysage,options);
+        this.bmp = BitmapFactory.decodeResource(resources,R.drawable.fruits,options);
         initDimensions();
         initPixels();
     }
