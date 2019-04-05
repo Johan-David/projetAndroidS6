@@ -254,6 +254,10 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                 currentPictureUse.pixelisation();
                 return true;
 
+            case R.id.median:
+                currentPictureUse.median();
+                return true;
+
         }
         return super.onOptionsItemSelected(item);
     }
