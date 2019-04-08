@@ -16,7 +16,6 @@ import android.util.Log;
 import com.android.rssample.ScriptC_dynExtension;
 
 
-
 /**
  * It represents all the different treatments that an image can receive. A picture translate into a Bitmap and it dimensions.
  * @author Benjamin Darmet, Amandine Chauveau, Remi Barbosa, Johan David
@@ -874,6 +873,7 @@ public class Picture  {
 
 
                     }
+                    Log.i("PIXELISATION", "On est dans la boucle du x");
                     //Cas des bords en bas de l'image
                 }else if(y + lengthMatrice > height){
                     int newY = height - y;
@@ -924,17 +924,6 @@ public class Picture  {
 
         bmp.setPixels(pixels, 0, width, 0, 0, width, height);
     }
-
-
-
-
-
-
-
-
-
-
-
 
     /**
      * Change the attributes used for a convolution
@@ -1328,14 +1317,20 @@ public class Picture  {
         int[] pixelsCopie = new int[this.height * this.width];
         int matrice[] = new int[r*r];
         int start =  r / 2;
-        for(int y = start; y < this.height - start ; y++){                  
-            for(int x = start; x < this.width- start ; x++) {
+        for(int y = 0; y < this.height; y++){
+            for(int x = 0; x < this.width ; x++) {
                 int indMatrice = 0;
                 for (int i = x - start; i <= x + start; i++) {
                     for (int j = y - start; j <= y + start; j++) {
-
                         int indice = i + j * this.width;
-                        matrice[indMatrice] = this.pixels[indice];
+
+                        if(i <= start || i >= this.width - start){
+                            matrice[indMatrice] = 0;
+                        }else if(j <= start || j >= this.height - start){
+                            matrice[indMatrice] = 0;
+                        }else{
+                            matrice[indMatrice] = this.pixels[indice];
+                        }
                         indMatrice ++;
                     }
                 }
