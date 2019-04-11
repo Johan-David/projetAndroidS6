@@ -7,8 +7,9 @@ package com.example.jdavid004.projetandroids6;
 public enum Treatment {
     TOGREY,
     SEPIA,
-    COLOR,
     PIXELISATION,
     THRESHOLDING,
+    COLORONLY,
+    NEGATIF,
     BLUR;
 }

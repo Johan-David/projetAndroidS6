@@ -3,6 +3,11 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
+        android:id="@+id/save"
+        android:icon="@drawable/ic_save"
+        android:title="Save"
+        app:showAsAction="always"></item>
+    <item
         android:id="@+id/camera"
         android:icon="@drawable/ic_camera"
         android:title="camera"
@@ -97,13 +102,6 @@
     <item
         android:id="@+id/Luminosity"
         android:title="Luminosity" />
-
-    <item android:id="@+id/saveImage"
-        android:icon="@drawable/ic_menu"
-        android:title="Save"
-        app:showAsAction="never" >
-
-    </item>
 
     <item
         android:id="@+id/pixelisation"

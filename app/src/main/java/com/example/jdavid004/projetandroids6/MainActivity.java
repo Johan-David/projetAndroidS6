@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -60,7 +61,7 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
     private static final int GALLERY_REQUEST = 1314;
     private static final int REQUEST_TAKE_PHOTO = 1;
     private int STORAGE_PERMISSION_CODE = 1;
-    private static final int NB_PICTURE_PREVIEW = 5;
+    private static final int NB_PICTURE_PREVIEW = 7;
 
     /* seekbar macro */
     private int SEEKBAR_OPTION_NULL = 0;
@@ -123,6 +124,16 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
             case R.id.camera:
                 dispatchTakePictureIntent(); // Take a photo with a camera app
                 return true;
+
+            case R.id.save:
+                //check if the permission to write in the storage is already granted
+                if(ContextCompat.checkSelfPermission(MainActivity.this,Manifest.permission.WRITE_EXTERNAL_STORAGE)!= PackageManager.PERMISSION_GRANTED){
+                    requestStoragePermission();
+                }
+                Save saveFile = new Save();
+                saveFile.SaveImage(this,currentPictureUse.getBmp());
+                return true;
+
 
             // click on the arrow to cancel effects
             case R.id.reset:
@@ -247,15 +258,6 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
             //click on the import icon to access to the gallery
             case R.id.importFromGallery:
                 getImageFromGallery();
-                return true;
-
-            case R.id.saveImage:
-                //check if the permission to write in the storage is already granted
-                if(ContextCompat.checkSelfPermission(MainActivity.this,Manifest.permission.WRITE_EXTERNAL_STORAGE)!= PackageManager.PERMISSION_GRANTED){
-                    requestStoragePermission();
-                }
-                Save saveFile = new Save();
-                saveFile.SaveImage(this,currentPictureUse.getBmp());
                 return true;
 
             case R.id.pixelisation:
@@ -528,6 +530,18 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                     view.setImageBitmap(picturePreview.getBmp());
                     tablePreview[i] = new Preview(view,Treatment.THRESHOLDING);
                     break;
+
+                case 5: // Sixth preview use the median function
+                    picturePreview.colorOnlyHsvRS(getApplicationContext(),Color.rgb(255,0,0));
+                    view.setImageBitmap(picturePreview.getBmp());
+                    tablePreview[i] = new Preview(view,Treatment.COLORONLY);
+                    break;
+
+                case 6:
+                    picturePreview.invertRS(getApplicationContext());
+                    view.setImageBitmap(picturePreview.getBmp());
+                    tablePreview[i] = new Preview(view,Treatment.NEGATIF);
+                    break;
             }
             this.tablePreview[i].getImagePreview().setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -558,6 +572,13 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                                     }
                                     currentPictureUse.ModifyConvolutionAttributes(matrixMoy, mWidthMoy, mHeightMoy, false, true);
                                     currentPictureUse.computeIntrinsicConvolve(getApplicationContext());
+                                    break;
+                                case COLORONLY:
+                                    currentPictureUse.colorOnlyHsvRS(getApplicationContext(), Color.rgb(255,0,0));
+                                    break;
+
+                                case NEGATIF:
+                                    currentPictureUse.invertRS(getApplicationContext());
                                     break;
                             }
                         }
