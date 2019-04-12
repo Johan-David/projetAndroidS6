@@ -294,6 +294,7 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                         originalPictureUse = new Picture(imageBitmap);
                         currentPictureUse = new Picture(imageBitmap);
                         imageViewCentral.setImageBitmap(currentPictureUse.getBmp());
+                        initialisePreview();
                     }
                 }
                 break;
@@ -353,8 +354,6 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                 Log.i("Photo", "Photo prise et sauvegardé dans un fichier");
             }
         }
-
-
     }
 
     /**
@@ -383,6 +382,7 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
             originalPictureUse = new Picture(bmp);
             imageViewCentral.setImageBitmap(currentPictureUse.getBmp());
         }
+        initialisePreview();
     }
 
     /**
