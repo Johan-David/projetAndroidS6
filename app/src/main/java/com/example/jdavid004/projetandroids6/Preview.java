@@ -11,8 +11,8 @@ public class Preview {
     private ImageView imagePreview;
     private Treatment treatmentUse;
 
-    Preview(ImageView Preview, Treatment treatmentUse){
-        this.imagePreview = Preview;
+    Preview(ImageView preview, Treatment treatmentUse){
+        this.imagePreview = preview;
         this.treatmentUse = treatmentUse;
     }
 

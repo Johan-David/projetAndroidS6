@@ -51,6 +51,9 @@
             <item android:id="@+id/invert"
                 android:title="Négatif"
                 app:showAsAction="never" ></item>
+            <item android:id="@+id/drawing"
+                android:title="Drawing"
+                app:showAsAction="never" ></item>
 
         </menu>
     </item>
@@ -100,7 +103,7 @@
         </menu>
     </item>
     <item
-        android:id="@+id/Luminosity"
+        android:id="@+id/luminosity"
         android:title="Luminosity" />
 
     <item

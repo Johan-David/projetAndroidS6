@@ -22,24 +22,24 @@ import java.util.Calendar;
  * @author Benjamin Darmet, Amandine Chauveau, Remi Barbosa, Johan David
  */
 public class Save {
-    private Context TheThis;    //gets the current context
-    private String NameOfFolder = "ApplicationImage";   //name of the folder that will contain all the pictures saved by the application
-    private String NameOfFile = "MyImage";  //prefix name common to all the pictures
+    private Context theThis;    //gets the current context
+    private String nameOfFolder = "ApplicationImage";   //name of the folder that will contain all the pictures saved by the application
+    private String nameOfFile = "MyImage";  //prefix name common to all the pictures
 
     /**
-     * SaveImage : main method, saves the image given by imageToSave in the gallery
+     * saveImage : main method, saves the image given by imageToSave in the gallery
      * @param context : current context of the application
      * @param imageToSave : bitmap of the image to save
      */
-    public void SaveImage(Context context, Bitmap imageToSave ){
-        TheThis = context;
+    public void saveImage(Context context, Bitmap imageToSave ){
+        theThis = context;
 
         String currentDateAndTime = getCurrentDateAndTime();
-        String pictureName = NameOfFile+currentDateAndTime+".png"; //complete name of the picture to save
+        String pictureName = nameOfFile+currentDateAndTime+".png"; //complete name of the picture to save
 
         try {
             //root : file representing the path in where to save the image
-            File root = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES) + File.separator + NameOfFolder + File.separator);
+            File root = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES) + File.separator + nameOfFolder + File.separator);
             root.mkdirs(); //creates the folder if necessary
             File imageFile = new File(root, pictureName); //file representing the image
             OutputStream fOut = new FileOutputStream(imageFile); //file output stream in where to write the bitmap
@@ -70,7 +70,7 @@ public class Save {
      * @param file : file to test
      */
     private void fileCreatedAndAvailable(File file){
-        MediaScannerConnection.scanFile(TheThis, new String[]{file.toString()}, null, new MediaScannerConnection.OnScanCompletedListener() {
+        MediaScannerConnection.scanFile(theThis, new String[]{file.toString()}, null, new MediaScannerConnection.OnScanCompletedListener() {
             @Override
             public void onScanCompleted(String path, Uri uri) {
                 Log.e("ExternalStorage","Scanned" + path + ":");
@@ -83,13 +83,13 @@ public class Save {
      * unableToSave : displays an error message
      */
     private void unableToSave() {
-        Toast.makeText(TheThis, "Failed to access to gallery", Toast.LENGTH_SHORT).show();
+        Toast.makeText(theThis, "Failed to access to gallery", Toast.LENGTH_SHORT).show();
     }
 
     /**
      * ableToSave : displays a message to confirm that the picture has been saved
      */
     private void ableToSave() {
-        Toast.makeText(TheThis, "Picture saved in gallery", Toast.LENGTH_SHORT).show();
+        Toast.makeText(theThis, "Picture saved in gallery", Toast.LENGTH_SHORT).show();
     }
 }

@@ -96,14 +96,6 @@ public class Picture  {
         return height;
     }
 
-    public int[] getPixels() {
-        int[] res = new int[length];
-        for(int i=0;i<length;i++){
-            res[i]=pixels[i];
-        }
-        return res;
-    }
-
     void initPixels(){
         this.pixels = new int[width*height];
         this.bmp.getPixels(pixels,0,width,0,0,width,height);
@@ -257,30 +249,21 @@ public class Picture  {
     }
 
     void drawing(Context context){
-        Picture blur_picture = new Picture(this.getBmp());
-        blur_picture.toGreyRS(context);
-        int[] pixels_grey = blur_picture.getPixels();
-        blur_picture.invertRS(context);
-        blur_picture.computeIntrinsicGaussianBlur(context, 3);
-        int[] pixels_blurred = blur_picture.getPixels();
-        int[] pixels_res = dodge(pixels_blurred, pixels_grey);
-        this.bmp.setPixels(pixels_res,0,width,0,0,width,height);
-
-    }
-
-    int[] dodge(int[] front, int[] back){
-        int[] res = new int[length];
-        for(int i = 0; i < length; i++){
-            int grey;
-            if(Color.red(back[i])==255){
-                grey=255;
-            }else{
-                grey=Color.red(front[i])*255/(255-Color.red(back[i]));
-                if(Color.red(res[i])>255)grey=255;
-            }
-            res[i] = Color.rgb(grey,grey,grey);
-        }
-        return res;
+        toGreyRS(context);
+        int mWidthLaplacien = 3;
+        int mHeightLaplacien = mWidthLaplacien;
+        int [][] matrixLaplacien = { {0,1,0}, {1,-4,1}, {0,1,0} };
+        modifyConvolutionAttributes(matrixLaplacien, mWidthLaplacien, mHeightLaplacien, false, false);
+        /*int mWidthSobel = 3;
+        int mHeightSobel = mWidthSobel;
+        int[][] matrixSobel = { {-1,0,1}, {-2,0,2}, {-1,0,1} };
+        ModifyConvolutionAttributes(matrixSobel, mWidthSobel, mHeightSobel,true, false);*/
+        /*int mWidthPrewitt = 3;
+        int mHeightPrewitt = mWidthPrewitt;
+        int[][] matrixPrewitt = { {-1,0,1}, {-1,0,1}, {-1,0,1} };
+        ModifyConvolutionAttributes(matrixPrewitt, mWidthPrewitt, mHeightPrewitt,true, false);*/
+        computeRS(context);
+        invertRS(context);
     }
 
 
@@ -340,8 +323,8 @@ public class Picture  {
                 int R = Color.red(pixels[i]);
                 int G = Color.green(pixels[i]);
                 int B = Color.blue(pixels[i]);
-                int Grey = (int) (0.3 * R + 0.59 * G + 0.11 * B);
-                pixels[i] = Color.rgb(Grey, Grey, Grey);
+                int grey = (int) (0.3 * R + 0.59 * G + 0.11 * B);
+                pixels[i] = Color.rgb(grey, grey, grey);
             }
         }
         bmp.setPixels(pixels,0,width,0,0,width,height);
@@ -375,16 +358,16 @@ public class Picture  {
                     int R = Color.red(pixels[i]);
                     int G = Color.green(pixels[i]);
                     int B = Color.blue(pixels[i]);
-                    int Grey = (int) (0.3 * R + 0.59 * G + 0.11 * B);
-                    pixels[i] = Color.rgb(Grey, Grey, Grey);
+                    int grey = (int) (0.3 * R + 0.59 * G + 0.11 * B);
+                    pixels[i] = Color.rgb(grey, grey, grey);
                 }
             }else{
                 if(!(hsv[0]  >= minHSV && hsv[0] <= maxHSV) ){
                     int R = Color.red(pixels[i]);
                     int G = Color.green(pixels[i]);
                     int B = Color.blue(pixels[i]);
-                    int Grey = (int) (0.3 * R + 0.59 * G + 0.11 * B);
-                    pixels[i] = Color.rgb(Grey, Grey, Grey);
+                    int grey = (int) (0.3 * R + 0.59 * G + 0.11 * B);
+                    pixels[i] = Color.rgb(grey, grey, grey);
                 }
             }
 
@@ -792,7 +775,7 @@ public class Picture  {
      * @param pourcent Percentage of selected brightness
      * @param picture Picture use to copy the value of a pixel of a bitmap where the brightness has not changed. In other words, it is a copy of the processed image.
      */
-    void AdjustLuminosity(int pourcent, Picture picture){
+    void adjustLuminosity(int pourcent, Picture picture){
         if(pourcent==100){
             return;
         }
@@ -819,7 +802,7 @@ public class Picture  {
      * @param pourcent Percentage of selected brightness
      * @param picture Picture use to copy the value of a pixel of a bitmap where the brightness has not changed. In other words, it is a copy of the processed image
      */
-    void AdjustLuminosityRS(Context context, int pourcent, Picture picture){
+    void adjustLuminosityRS(Context context, int pourcent, Picture picture){
         if(pourcent != 100){
             RenderScript rs = RenderScript.create(context);
 
@@ -936,7 +919,7 @@ public class Picture  {
      * @param secondApplyWithMatrixTranslation Boolean to determine if we apply a matrix and its translation
      * @param normalize Boolean to determine if we have to normalize
      */
-    void ModifyConvolutionAttributes(int[][] mat, int width, int height, boolean secondApplyWithMatrixTranslation, boolean normalize){
+    void modifyConvolutionAttributes(int[][] mat, int width, int height, boolean secondApplyWithMatrixTranslation, boolean normalize){
         this.m_width = width;
         this.m_height = height;
         this.matrix = new int[width][height];
@@ -955,18 +938,18 @@ public class Picture  {
      * Apply the convolution corresponding to the core set in attribute
      */
     void compute(){
-        int[] SrcPixels = new int[height*width];
-        bmp.getPixels(SrcPixels,0,width,0,0,width,height);
-        int[] ResPixels = SrcPixels.clone();
+        int[] srcPixels = new int[height*width];
+        bmp.getPixels(srcPixels,0,width,0,0,width,height);
+        int[] resPixels = srcPixels.clone();
 
         //These 6 variables are only used when a contour is applied
         int maxModuleGradiantRed = 0;
         int maxModuleGradiantGreen = 0;
         int maxModuleGradiantBlue = 0;
 
-        int[] GradiantRed = new int[height*width];
-        int[] GradiantGreen = new int[height*width];
-        int[] GradiantBlue = new int[height*width];
+        int[] gradiantRed = new int[height*width];
+        int[] gradiantGreen = new int[height*width];
+        int[] gradiantBlue = new int[height*width];
 
         for(int y = 0; y < height-this.m_height+1; y++){                   //Run through the image from left to right, downhill
             for(int x = 0; x < width-this.m_width+1; x++){
@@ -981,7 +964,7 @@ public class Picture  {
 
                 for(int my = 0; my < this.m_height; my++){                          //Run through the matrix
                     for(int mx = 0; mx < this.m_width; mx++){
-                        int curPixel = SrcPixels[(x+mx)+(y+my)*bmp.getWidth()];     //Pixels covered by the matrix
+                        int curPixel = srcPixels[(x+mx)+(y+my)*bmp.getWidth()];     //Pixels covered by the matrix
                         int mValue = matrix[mx][my];                                //Value of the matrix in (mx, my)
                         sumRed = sumRed + (Color.red(curPixel)*mValue);
                         sumGreen = sumGreen + (Color.green(curPixel)*mValue);
@@ -1006,9 +989,9 @@ public class Picture  {
                     maxModuleGradiantGreen = Math.max(maxModuleGradiantGreen,moduleGradiantGreen);
                     maxModuleGradiantBlue = Math.max(maxModuleGradiantBlue,moduleGradiantBlue);
 
-                    GradiantRed[index_center] = moduleGradiantRed;
-                    GradiantGreen[index_center] = moduleGradiantGreen;
-                    GradiantBlue[index_center] = moduleGradiantBlue;
+                    gradiantRed[index_center] = moduleGradiantRed;
+                    gradiantGreen[index_center] = moduleGradiantGreen;
+                    gradiantBlue[index_center] = moduleGradiantBlue;
 
                 } else {
                     int newRed = 0;
@@ -1047,7 +1030,7 @@ public class Picture  {
                         newBlue = 255;
                     }
 
-                    ResPixels[index_center] = Color.rgb(newRed,newGreen,newBlue);
+                    resPixels[index_center] = Color.rgb(newRed,newGreen,newBlue);
                 }
             }
         }
@@ -1057,10 +1040,10 @@ public class Picture  {
                 for (int x = 0; x < width - this.m_width + 1; x++) {
                     int index_center = ((x + (this.m_width / 2)) + (y + (this.m_height / 2)) * width);   //pixel's index in the center of the matrix
 
-                    float newRed = (GradiantRed[index_center] / (float)maxModuleGradiantRed) * 255;          //notrmalization by the max
-                    float newGreen = (GradiantGreen[index_center] / (float)maxModuleGradiantGreen) * 255;
-                    float newBlue = (GradiantBlue[index_center] / (float)maxModuleGradiantBlue) * 255;
-                    ResPixels[index_center] = Color.rgb((int)newRed, (int)newGreen, (int)newBlue);
+                    float newRed = (gradiantRed[index_center] / (float)maxModuleGradiantRed) * 255;          //notrmalization by the max
+                    float newGreen = (gradiantGreen[index_center] / (float)maxModuleGradiantGreen) * 255;
+                    float newBlue = (gradiantBlue[index_center] / (float)maxModuleGradiantBlue) * 255;
+                    resPixels[index_center] = Color.rgb((int)newRed, (int)newGreen, (int)newBlue);
                 }
             }
         }
@@ -1069,23 +1052,22 @@ public class Picture  {
             for(int y = 0; y < height; y++){
                 for(int x = 0; x < width; x++){
                     if(y == 0 && x != 0 && x != width-1){                          //case of the upper edge without corner
-                        ResPixels[x+y*bmp.getWidth()] = ResPixels[x+(y+1)*bmp.getWidth()];
+                        resPixels[x+y*bmp.getWidth()] = resPixels[x+(y+1)*bmp.getWidth()];
                     }
                     if(y == height-1 && x != 0 && x != height-1){          //case of the lower edge without corner
-                        ResPixels[x+y*width] = ResPixels[x+(y-1)*width];
+                        resPixels[x+y*width] = resPixels[x+(y-1)*width];
                     }
                     if(x == 0){                                                             //case of the left edge
-                        ResPixels[x+y*width] = ResPixels[(x+1)+y*width];
+                        resPixels[x+y*width] = resPixels[(x+1)+y*width];
                     }
                     if(x == width-1){                                              //case of the right edge
-                        ResPixels[x+y*width] = ResPixels[(x-1)+y*width];
+                        resPixels[x+y*width] = resPixels[(x-1)+y*width];
                     }
 
                 }
             }
         }
-
-        bmp.setPixels(ResPixels,0,width,0,0,width,height);   //Assigning new pixels to the image
+        bmp.setPixels(resPixels,0,width,0,0,width,height);   //Assigning new pixels to the image
     }
 
     /**
@@ -1145,12 +1127,13 @@ public class Picture  {
      * @param context Context of the application
      * @param radius Radius of the gaussian blur
      */
-    void computeIntrinsicGaussianBlur(Context context, float radius){
+    void computeIntrinsicGaussianBlur(Context context, float radius, Picture picture){
         RenderScript rs = RenderScript.create(context);
 
         ScriptIntrinsicBlur blurScript = ScriptIntrinsicBlur.create(rs, Element.U8_4(rs));
 
         Allocation inAllocation = Allocation.createFromBitmap(rs, bmp);
+        if(picture != null) inAllocation = Allocation.createFromBitmap(rs,picture.getBmp());
         Allocation outAllocation = Allocation.createTyped(rs, inAllocation.getType());
 
         blurScript.setRadius(radius);

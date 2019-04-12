@@ -56,6 +56,7 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
     private SeekBar seekbarlum;         //cursor bar to modify luminosity
     private TextView textLumi;          //Text indication for luminosity
     private SeekBar seekBarContrast;    //cursor bar to modify contrast
+    private SeekBar seekbarBlur;         //cursor bar to modify Blur
     private String currentPhotoPath;
     private int previewId;
     private static final int GALLERY_REQUEST = 1314;
@@ -67,6 +68,7 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
     private int SEEKBAR_OPTION_NULL = 0;
     private int SEEKBAR_OPTION_LUMINOSITY = 1;
     private int SEEKBAR_OPTION_CONTRAST_DYN = 2; //contrastDynamicExten
+    private int SEEKBAR_OPTION_BLUR = 3;
     private int seekBarOption = 0;
 
     @Override
@@ -91,6 +93,11 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
         seekBarContrast.setVisibility(View.GONE);
         seekBarContrast.setOnSeekBarChangeListener(this);
         seekBarContrast.setMax(200);
+
+        seekbarBlur = (SeekBar)findViewById(R.id.seekbarBlur);
+        seekbarBlur.setVisibility(View.GONE);
+        seekbarBlur.setOnSeekBarChangeListener(this);
+        seekbarBlur.setMax(15);
 
         mDefaultColor = ContextCompat.getColor(MainActivity.this, R.color.colorPrimary);
 
@@ -117,6 +124,8 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
 
         seekBarContrast.setVisibility(View.GONE);
 
+        seekbarBlur.setVisibility(View.GONE);
+
         seekBarOption = SEEKBAR_OPTION_NULL; // seekBarOption = 0
 
         switch(item.getItemId()){
@@ -131,7 +140,7 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                     requestStoragePermission();
                 }
                 Save saveFile = new Save();
-                saveFile.SaveImage(this,currentPictureUse.getBmp());
+                saveFile.saveImage(this,currentPictureUse.getBmp());
                 return true;
 
 
@@ -193,22 +202,27 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                         matrixMoy[i][j]=1;
                     }
                 }
-                currentPictureUse.ModifyConvolutionAttributes(matrixMoy, mWidthMoy, mHeightMoy, false, true);
+                currentPictureUse.modifyConvolutionAttributes(matrixMoy, mWidthMoy, mHeightMoy, false, true);
                 //currentPictureUse.compute();
                 //currentPictureUse.computeRS(getApplicationContext());
                 currentPictureUse.computeIntrinsicConvolve(getApplicationContext());
                 return true;
 
             case R.id.gaussien:
-                int mWidthGauss = 3;
+                /*int mWidthGauss = 3;
                 int mHeightGauss = mWidthGauss;
                 int [][] matrixGauss = { {1,2,1},
                                          {2,4,2},
                                          {1,2,1} };
-                currentPictureUse.ModifyConvolutionAttributes(matrixGauss, mWidthGauss, mHeightGauss, false, true);
+                currentPictureUse.modifyConvolutionAttributes(matrixGauss, mWidthGauss, mHeightGauss, false, true);
                 //currentPictureUse.compute();
                 //currentPictureUse.computeRS(getApplicationContext());
-                currentPictureUse.computeIntrinsicGaussianBlur(getApplicationContext(), 3);
+                currentPictureUse.computeIntrinsicGaussianBlur(getApplicationContext(), 3, null);*/
+
+                seekBarOption = SEEKBAR_OPTION_BLUR;
+                seekbarBlur.setProgress(0);
+                seekbarBlur.setVisibility(View.VISIBLE);
+                copycurrentPictureUse = new Picture(currentPictureUse.getBmp());
                 return true;
 
             case R.id.prewitt:
@@ -217,7 +231,7 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                 int[][] matrixPrewitt = { {-1,0,1},
                                           {-1,0,1},
                                           {-1,0,1} };
-                currentPictureUse.ModifyConvolutionAttributes(matrixPrewitt, mWidthPrewitt, mHeightPrewitt,true, false);
+                currentPictureUse.modifyConvolutionAttributes(matrixPrewitt, mWidthPrewitt, mHeightPrewitt,true, false);
                 //currentPictureUse.compute();
                 //currentPictureUse.computeRS(getApplicationContext());
                 currentPictureUse.computeIntrinsicConvolve(getApplicationContext());
@@ -229,7 +243,7 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                 int[][] matrixSobel = { {-1,0,1},
                                         {-2,0,2},
                                         {-1,0,1} };
-                currentPictureUse.ModifyConvolutionAttributes(matrixSobel, mWidthSobel, mHeightSobel,true, false);
+                currentPictureUse.modifyConvolutionAttributes(matrixSobel, mWidthSobel, mHeightSobel,true, false);
                 //currentPictureUse.compute();
                 //currentPictureUse.computeRS(getApplicationContext());
                 currentPictureUse.computeIntrinsicConvolve(getApplicationContext());
@@ -241,13 +255,13 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                 int [][] matrixLaplacien = { {0,1,0},
                                              {1,-4,1},
                                              {0,1,0} };
-                currentPictureUse.ModifyConvolutionAttributes(matrixLaplacien, mWidthLaplacien, mHeightLaplacien, false, false);
+                currentPictureUse.modifyConvolutionAttributes(matrixLaplacien, mWidthLaplacien, mHeightLaplacien, false, false);
                 //currentPictureUse.compute();
                 //currentPictureUse.computeRS(getApplicationContext());
                 currentPictureUse.computeIntrinsicConvolve(getApplicationContext());
                 return true;
 
-            case R.id.Luminosity:
+            case R.id.luminosity:
                 seekBarOption = SEEKBAR_OPTION_LUMINOSITY;
                 seekbarlum.setProgress(100);
                 seekbarlum.setVisibility(View.VISIBLE);
@@ -266,6 +280,10 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
 
             case R.id.median:
                 currentPictureUse.median();
+                return true;
+
+            case R.id.drawing:
+                currentPictureUse.drawing(getApplicationContext());
                 return true;
 
         }
@@ -464,7 +482,7 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
     public void onStopTrackingTouch(SeekBar seekBar) {
         if(seekBarOption == SEEKBAR_OPTION_LUMINOSITY){
             //currentPictureUse.AdjustLuminosity(seekBar.getProgress(),copycurrentPictureUse);
-            currentPictureUse.AdjustLuminosityRS(getApplicationContext(),seekBar.getProgress()+25,copycurrentPictureUse);
+            currentPictureUse.adjustLuminosityRS(getApplicationContext(),seekBar.getProgress()+25,copycurrentPictureUse);
         }
 
         if(seekBarOption == SEEKBAR_OPTION_CONTRAST_DYN){
@@ -472,7 +490,13 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
             //currentPictureUse.contrastDynamicExtensionRS(getApplicationContext());
         }
 
-
+        if(seekBarOption == SEEKBAR_OPTION_BLUR){
+            int seekbarValue = seekBar.getProgress()+3;
+            if(seekbarValue % 2 == 0){
+                seekbarValue++;
+            }
+            currentPictureUse.computeIntrinsicGaussianBlur(getApplicationContext(), seekbarValue, copycurrentPictureUse);
+        }
     }
 
     /**
@@ -516,7 +540,7 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                             matrixMoy[k][j] = 1;
                         }
                     }
-                    picturePreview.ModifyConvolutionAttributes(matrixMoy, mWidthMoy, mHeightMoy, false, true);
+                    picturePreview.modifyConvolutionAttributes(matrixMoy, mWidthMoy, mHeightMoy, false, true);
                     picturePreview.computeIntrinsicConvolve(getApplicationContext());
                     picturePreview.computeIntrinsicConvolve(getApplicationContext());
                     picturePreview.computeIntrinsicConvolve(getApplicationContext());
@@ -551,15 +575,19 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                             switch (tablePreview[j].getTreatmentUse()){
                                 case TOGREY:
                                     currentPictureUse.toGreyRS(getApplicationContext());
+                                    imageViewCentral.setImageBitmap(currentPictureUse.getBmp());
                                     break;
                                 case SEPIA:
                                     currentPictureUse.sepiaRS(getApplicationContext());
+                                    imageViewCentral.setImageBitmap(currentPictureUse.getBmp());
                                     break;
                                 case PIXELISATION:
                                     currentPictureUse.pixelisation();
+                                    imageViewCentral.setImageBitmap(currentPictureUse.getBmp());
                                     break;
                                 case THRESHOLDING:
                                     currentPictureUse.thresholdingRS(getApplicationContext());
+                                    imageViewCentral.setImageBitmap(currentPictureUse.getBmp());
                                     break;
                                 case BLUR:
                                     int mWidthMoy = 5;
@@ -570,15 +598,18 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                                             matrixMoy[k][l] = 1;
                                         }
                                     }
-                                    currentPictureUse.ModifyConvolutionAttributes(matrixMoy, mWidthMoy, mHeightMoy, false, true);
+                                    currentPictureUse.modifyConvolutionAttributes(matrixMoy, mWidthMoy, mHeightMoy, false, true);
                                     currentPictureUse.computeIntrinsicConvolve(getApplicationContext());
+                                    imageViewCentral.setImageBitmap(currentPictureUse.getBmp());
                                     break;
                                 case COLORONLY:
                                     currentPictureUse.colorOnlyHsvRS(getApplicationContext(), Color.rgb(255,0,0));
+                                    imageViewCentral.setImageBitmap(currentPictureUse.getBmp());
                                     break;
 
                                 case NEGATIF:
                                     currentPictureUse.invertRS(getApplicationContext());
+                                    imageViewCentral.setImageBitmap(currentPictureUse.getBmp());
                                     break;
                             }
                         }
